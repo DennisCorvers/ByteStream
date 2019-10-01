@@ -14,6 +14,7 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ReadBool(byte[] bin, int offset)
         {
             return bin[offset] == 1;
@@ -23,6 +24,7 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte ReadByte(byte[] bin, int offset)
         {
             return bin[offset];
@@ -32,6 +34,7 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static sbyte ReadSByte(byte[] bin, int offset)
         {
             return (sbyte)bin[offset];
@@ -41,6 +44,7 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static char ReadChar(byte[] bin, int offset)
         {
             fixed (byte* pbyte = &bin[offset])
@@ -51,6 +55,7 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static char ReadCharSingle(byte[] bin, int offset)
         {
             return (char)bin[offset];
@@ -60,6 +65,7 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static decimal ReadDecimal(byte[] bin, int offset)
         {
             fixed (byte* ptr = &bin[offset])
@@ -70,6 +76,7 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double ReadDouble(byte[] bin, int offset)
         {
             fixed (byte* ptr = &bin[offset])
@@ -80,6 +87,7 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float ReadSingle(byte[] bin, int offset)
         {
             fixed (byte* ptr = &bin[offset])
@@ -90,6 +98,7 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ReadInt(byte[] bin, int offset)
         {
             fixed (byte* ptr = &bin[offset])
@@ -100,6 +109,7 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint ReadUInt(byte[] bin, int offset)
         {
             fixed (byte* ptr = &bin[offset])
@@ -110,6 +120,7 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long ReadLong(byte[] bin, int offset)
         {
             fixed (byte* ptr = &bin[offset])
@@ -120,6 +131,7 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong ReadULong(byte[] bin, int offset)
         {
             fixed (byte* ptr = &bin[offset])
@@ -130,6 +142,7 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static short ReadShort(byte[] bin, int offset)
         {
             fixed (byte* ptr = &bin[offset])
@@ -140,6 +153,7 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort ReadUShort(byte[] bin, int offset)
         {
             fixed (byte* ptr = &bin[offset])
@@ -235,6 +249,15 @@ namespace ByteStream
             bin.CopyUnsafe(offset, result, 0, length);
             return result;
         }
+        /// <summary>
+        /// Reads a blittable value type from the source array.
+        /// </summary>
+        /// <param name="bin">The source array.</param>
+        /// <param name="offset">The current read offset.</param>
+        public static T ReadValue<T>(byte[] bin, int offset) where T : unmanaged
+        {
+
+        }
         #endregion
 
         #region WriteBytes
@@ -244,6 +267,7 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteBool(byte[] dest, int offset, bool value)
         {
             dest[offset] = (byte)(value ? 1 : 0);
@@ -254,6 +278,7 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteSByte(byte[] dest, int offset, sbyte value)
         {
             dest[offset] = (byte)value;
@@ -264,6 +289,7 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteByte(byte[] dest, int offset, byte value)
         {
             dest[offset] = value;
@@ -274,6 +300,7 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteChar(byte[] dest, int offset, char value)
         {
             fixed (byte* ptr = &dest[offset])
@@ -285,6 +312,7 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteCharSingle(byte[] dest, int offset, char value)
         {
             dest[offset] = (byte)value;
@@ -295,6 +323,7 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteDouble(byte[] dest, int offset, double value)
         {
             fixed (byte* ptr = &dest[offset])
@@ -306,6 +335,7 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteSingle(byte[] dest, int offset, float value)
         {
             fixed (byte* ptr = &dest[offset])
@@ -317,6 +347,7 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteDecimal(byte[] dest, int offset, decimal value)
         {
             fixed (byte* ptr = &dest[offset])
@@ -328,6 +359,7 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteInt(byte[] dest, int offset, int value)
         {
             fixed (byte* ptr = &dest[offset])
@@ -339,6 +371,7 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteUInt(byte[] dest, int offset, uint value)
         {
             fixed (byte* ptr = &dest[offset])
@@ -350,6 +383,7 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteLong(byte[] dest, int offset, long value)
         {
             fixed (byte* ptr = &dest[offset])
@@ -361,6 +395,7 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteULong(byte[] dest, int offset, ulong value)
         {
             fixed (byte* ptr = &dest[offset])
@@ -372,6 +407,7 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteShort(byte[] dest, int offset, short value)
         {
             fixed (byte* ptr = &dest[offset])
@@ -383,6 +419,7 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteUshort(byte[] dest, int offset, ushort value)
         {
             fixed (byte* ptr = &dest[offset])
@@ -457,6 +494,16 @@ namespace ByteStream
             if (bytesToSkip < 1) { throw new ArgumentOutOfRangeException("bytesToSkip", "Must be at least 1."); }
             for (int i = 0; i < bytesToSkip; i++)
             { dest[i + offset] = 0; }
+        }
+        /// <summary>
+        /// Writes a blittable value type to the specified byte array.
+        /// </summary>
+        /// <param name="dest">The destination byte array.</param>
+        /// <param name="offset">The current write offset.</param>
+        /// <param name="value">The value to write to the destination.</param>
+        public static void WriteValue<T>(byte[] dest, int offset, T value) where T : unmanaged
+        {
+
         }
         #endregion
 
@@ -665,6 +712,16 @@ namespace ByteStream
 
             return result;
         }
+        /// <summary>
+        /// Reads a blittable value type from the source memory.
+        /// </summary>
+        /// <param name="data">The source memory.</param>
+        /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T ReadValue<T>(IntPtr data, int offset) where T : unmanaged
+        {
+
+        }
         #endregion
 
         #region WriteSpan
@@ -674,6 +731,7 @@ namespace ByteStream
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteBool(IntPtr dest, int offset, bool value)
         {
             *((byte*)dest + offset) = (byte)(value ? 1 : 0);
@@ -684,6 +742,7 @@ namespace ByteStream
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteSByte(IntPtr dest, int offset, sbyte value)
         {
             *((sbyte*)dest + offset) = value;
@@ -694,6 +753,7 @@ namespace ByteStream
         /// <param name="dest">The destination memoryy.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteByte(IntPtr dest, int offset, byte value)
         {
             *((byte*)dest + offset) = value;
@@ -704,6 +764,7 @@ namespace ByteStream
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteChar(IntPtr dest, int offset, char value)
         {
             *((char*)dest + offset) = value;
@@ -714,6 +775,7 @@ namespace ByteStream
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteCharSingle(IntPtr dest, int offset, char value)
         {
             *((byte*)dest + offset) = (byte)value;
@@ -724,6 +786,7 @@ namespace ByteStream
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteDouble(IntPtr dest, int offset, double value)
         {
             *((double*)dest + offset) = value;
@@ -734,6 +797,7 @@ namespace ByteStream
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteSingle(IntPtr dest, int offset, float value)
         {
             *((float*)dest + offset) = value;
@@ -744,6 +808,7 @@ namespace ByteStream
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteDecimal(IntPtr dest, int offset, decimal value)
         {
             *((decimal*)dest + offset) = value;
@@ -754,6 +819,7 @@ namespace ByteStream
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteInt(IntPtr dest, int offset, int value)
         {
             *((int*)dest + offset) = value;
@@ -764,6 +830,7 @@ namespace ByteStream
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteUInt(IntPtr dest, int offset, uint value)
         {
             *((uint*)dest + offset) = value;
@@ -774,6 +841,7 @@ namespace ByteStream
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteLong(IntPtr dest, int offset, long value)
         {
             *((long*)dest + offset) = value;
@@ -784,6 +852,7 @@ namespace ByteStream
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteULong(IntPtr dest, int offset, ulong value)
         {
             *((ulong*)dest + offset) = value;
@@ -794,6 +863,7 @@ namespace ByteStream
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteShort(IntPtr dest, int offset, short value)
         {
             *((short*)dest + offset) = value;
@@ -804,6 +874,7 @@ namespace ByteStream
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteUshort(IntPtr dest, int offset, ushort value)
         {
             *((ushort*)dest + offset) = value;
@@ -883,6 +954,16 @@ namespace ByteStream
 
             byte* zeros = stackalloc byte[bytesToSkip];
             Buffer.MemoryCopy(zeros, (void*)(dest + offset), bytesToSkip, bytesToSkip);
+        }
+        /// <summary>
+        /// Writes a 16-bit unsigned integer value to the specified memory.
+        /// </summary>
+        /// <param name="dest">The destination memory.</param>
+        /// <param name="offset">The current write offset.</param>
+        /// <param name="value">The value to write to the destination.</param>
+        public static void WriteValue<T>(IntPtr dest, int offset, T value) where T : unmanaged
+        {
+
         }
         #endregion
     }

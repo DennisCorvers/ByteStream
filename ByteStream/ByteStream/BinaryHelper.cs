@@ -254,9 +254,11 @@ namespace ByteStream
         /// </summary>
         /// <param name="bin">The source array.</param>
         /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T ReadValue<T>(byte[] bin, int offset) where T : unmanaged
         {
-
+            fixed (byte* ptr = &bin[offset])
+            { return *(T*)ptr; }
         }
         #endregion
 
@@ -501,9 +503,11 @@ namespace ByteStream
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteValue<T>(byte[] dest, int offset, T value) where T : unmanaged
         {
-
+            fixed (byte* ptr = &dest[offset])
+            { *(T*)ptr = value; }
         }
         #endregion
 
@@ -720,7 +724,7 @@ namespace ByteStream
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T ReadValue<T>(IntPtr data, int offset) where T : unmanaged
         {
-
+            return *((T*)data + offset);
         }
         #endregion
 
@@ -961,9 +965,10 @@ namespace ByteStream
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteValue<T>(IntPtr dest, int offset, T value) where T : unmanaged
         {
-
+            *((T*)dest + offset) = value;
         }
         #endregion
     }

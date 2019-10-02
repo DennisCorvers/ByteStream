@@ -13,10 +13,4 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="API\" />
-    <Folder Include="Mananged\" />
-    <Folder Include="Unmanaged\" />
-  </ItemGroup>
-
 </Project>

@@ -248,7 +248,7 @@ namespace ByteStream.Unmanaged
         /// <param name="value"></param>
         public void WriteBytesLength(byte[] value)
         {
-            WriteValue((ushort)value.Length);
+            Write((ushort)value.Length);
             WriteBytes(value);
         }
         /// <summary>
@@ -289,7 +289,7 @@ namespace ByteStream.Unmanaged
         /// <param name="value"></param>
         public void WriteDBCSLength(string value)
         {
-            WriteValue((ushort)value.Length);
+            Write((ushort)value.Length);
             WriteDBCS(value);
         }
         /// <summary>
@@ -298,7 +298,7 @@ namespace ByteStream.Unmanaged
         /// <param name="value"></param>
         public void WriteASCIILength(string value)
         {
-            WriteValue((ushort)value.Length);
+            Write((ushort)value.Length);
             WriteASCII(value);
         }
         /// <summary>
@@ -336,7 +336,7 @@ namespace ByteStream.Unmanaged
         /// Writes a blittable struct or primitive value to the buffer.
         /// </summary>
         /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
-        public void WriteValue<T>(T value) where T : unmanaged
+        public void Write<T>(T value) where T : unmanaged
         {
             WriteValueInternal(value);
         }

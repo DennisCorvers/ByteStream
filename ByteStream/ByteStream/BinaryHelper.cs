@@ -423,7 +423,7 @@ namespace ByteStream
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteUshort(byte[] dest, int offset, ushort value)
+        public static void WriteUShort(byte[] dest, int offset, ushort value)
         {
             fixed (byte* ptr = &dest[offset])
             { *(ushort*)ptr = value; }
@@ -602,7 +602,7 @@ namespace ByteStream
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ReadInt(IntPtr data, int offset)
         {
-            return *((byte*)data + offset);
+            return *((int*)data + offset);
         }
         /// <summary>
         /// Reads a 32-bit unsigned integer value from the source memory.
@@ -880,7 +880,7 @@ namespace ByteStream
         /// <param name="offset">The current write offset.</param>
         /// <param name="value">The value to write to the destination.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteUshort(IntPtr dest, int offset, ushort value)
+        public static void WriteUShort(IntPtr dest, int offset, ushort value)
         {
             *((ushort*)dest + offset) = value;
         }

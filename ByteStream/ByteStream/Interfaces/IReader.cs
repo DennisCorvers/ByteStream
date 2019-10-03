@@ -6,6 +6,6 @@ namespace ByteStream.Interfaces
 {
     public interface IReader : IBuffer
     {
-        T ReadValue<T>() where T : unmanaged;
+        T Read<T>() where T : unmanaged;
     }
 }

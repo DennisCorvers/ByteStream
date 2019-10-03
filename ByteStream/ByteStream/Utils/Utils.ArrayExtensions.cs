@@ -18,8 +18,8 @@ namespace ByteStream.Utils
         {
             length *= sizeof(T);
 
-            fixed (T* src = &source[sourceIndex * sizeof(T)])
-            fixed (T* dst = &destination[destinationIndex * sizeof(T)])
+            fixed (T* src = &source[sourceIndex])
+            fixed (T* dst = &destination[destinationIndex])
             { Buffer.MemoryCopy(src, dst, length, length); }
         }
 

@@ -6,7 +6,7 @@ namespace ByteStream.Interfaces
 {
     public interface IWriter : IBuffer
     {
-        void WriteValue<T>(T value) where T : unmanaged;
+        void Write<T>(T value) where T : unmanaged;
 
         void Resize(int newSize);
 

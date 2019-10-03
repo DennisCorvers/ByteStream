@@ -184,7 +184,7 @@ namespace ByteStream.Unmanaged
         /// </summary>
         public byte[] ReadBytesLength()
         {
-            ushort length = ReadValue<ushort>();
+            ushort length = Read<ushort>();
             return ReadBytes(length);
         }
         /// <summary>
@@ -230,7 +230,7 @@ namespace ByteStream.Unmanaged
         /// </summary>
         public string ReadDBCSLength()
         {
-            ushort lengh = ReadValue<ushort>();
+            ushort lengh = Read<ushort>();
             return ReadDBCS(Length);
         }
         /// <summary>
@@ -238,7 +238,7 @@ namespace ByteStream.Unmanaged
         /// </summary>
         public string ReadASCIILength()
         {
-            ushort length = ReadValue<ushort>();
+            ushort length = Read<ushort>();
             return ReadASCII(length);
         }
         /// <summary>
@@ -246,7 +246,7 @@ namespace ByteStream.Unmanaged
         /// </summary>
         public string ReadUTF8()
         {
-            ushort length = ReadValue<ushort>();
+            ushort length = Read<ushort>();
             EnsureCapacity(length);
             string val = BinaryHelper.ReadUTF8(m_buffer, m_offset, length);
 
@@ -259,7 +259,7 @@ namespace ByteStream.Unmanaged
         /// </summary>
         public string ReadUTF16()
         {
-            ushort length = ReadValue<ushort>();
+            ushort length = Read<ushort>();
             EnsureCapacity(length);
             string val = BinaryHelper.ReadUTF16(m_buffer, m_offset, length);
 
@@ -271,7 +271,7 @@ namespace ByteStream.Unmanaged
         /// Reades a blittable struct or primitive value from the buffer.
         /// </summary>
         /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
-        public T ReadValue<T>() where T : unmanaged
+        public T Read<T>() where T : unmanaged
         {
             return ReadValueInternal<T>();
         }

@@ -6,131 +6,68 @@ using System.Text;
 
 namespace ByteStream.Mananged
 {
-    public class ByteReader : ByteReaderLight
+    public class ByteReader : IReader
     {
+#pragma warning disable IDE0032
+        protected byte[] m_buffer;
+        protected int m_offset;
+#pragma warning restore IDE0032
+
+        /// <summary>
+        /// The length of this reader.
+        /// </summary>
+        public int Length
+            => m_buffer.Length;
+        /// <summary>
+        /// The current read offset.
+        /// </summary>
+        public int Offset
+            => m_offset;
+        /// <summary>
+        /// Determines if this reader has a fixed size.
+        /// </summary>
+        public virtual bool IsFixedSize
+            => true;
+
         /// <summary>
         /// Creates a new instance of bytereader.
         /// </summary>
         /// <param name="data">The data to be read by this bytereader.</param>
         public ByteReader(byte[] data)
-            : base(data)
-        { }
+        {
+            m_buffer = data ?? throw new ArgumentNullException("data");
+            m_offset = 0;
+        }
 
         /// <summary>
-        /// Reads a boolean from the current packet.
+        /// Increases the read offset by some amount.
         /// </summary>
-        public bool ReadBool()
+        /// <param name="amount">The amounts of bytes to skip.</param>
+        public void SkipBytes(int amount)
         {
-            EnsureCapacity(sizeof(bool));
-            bool val = BinaryHelper.ReadBool(m_buffer, m_offset);
+            if (amount < 1)
+            { throw new ArgumentOutOfRangeException("amount"); }
 
-            m_offset += sizeof(bool);
-            return val;
+            EnsureCapacity(amount);
+            m_offset += amount;
         }
         /// <summary>
-        /// Reads a 8-bit unsigned integer from the current packet.
+        /// Resets the offset to zero.
         /// </summary>
-        public byte ReadByte()
+        public void Clear()
         {
-            EnsureCapacity(sizeof(byte));
-            byte val = BinaryHelper.ReadByte(m_buffer, m_offset);
+            m_offset = 0;
+        }
 
-            m_offset += sizeof(byte);
-            return val;
-        }
         /// <summary>
-        /// Reads a 8-bit signed integer from the current packet.
+        /// Reades a blittable struct or primitive value from the buffer.
         /// </summary>
-        public sbyte ReadSByte()
+        /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
+        public T Read<T>() where T : unmanaged
         {
-            EnsureCapacity(sizeof(sbyte));
-            sbyte val = BinaryHelper.ReadSByte(m_buffer, m_offset);
+            return ReadValueInternal<T>();
+        }
 
-            m_offset += sizeof(sbyte);
-            return val;
-        }
-        /// <summary>
-        /// Reads a character from the current packet. Uses 2 bytes.
-        /// </summary>
-        public char ReadChar()
-        {
-            return ReadValueInternal<char>();
-        }
-        /// <summary>
-        /// Reads a character from the current packet. Uses 1 byte (default is 2).
-        /// </summary>
-        /// <returns></returns>
-        public char ReadCharSingle()
-        {
-            EnsureCapacity(sizeof(byte));
-            char val = BinaryHelper.ReadCharSingle(m_buffer, m_offset);
-
-            m_offset += sizeof(byte);
-            return val;
-        }
-        /// <summary>
-        /// Reads a decimal from the current packet as 4 32-bit unsigned integers.
-        /// </summary>
-        public decimal ReadDecimal()
-        {
-            return ReadValueInternal<decimal>();
-        }
-        /// <summary>
-        /// Reads a double from the current packet.
-        /// </summary>
-        public double ReadDouble()
-        {
-            return ReadValueInternal<double>();
-        }
-        /// <summary>
-        /// Reads a floating precision point from the current packet.
-        /// </summary>
-        public float ReadSingle()
-        {
-            return ReadValueInternal<float>();
-        }
-        /// <summary>
-        /// Reads a 32-bit signed integer from the current packet.
-        /// </summary>
-        public int ReadInt()
-        {
-            return ReadValueInternal<int>();
-        }
-        /// <summary>
-        /// Reads a 32-bit unsigned integer from the current packet.
-        /// </summary>
-        public uint ReadUInt()
-        {
-            return ReadValueInternal<uint>();
-        }
-        /// <summary>
-        /// Reads a 64-bit signed integer from the current packet.
-        /// </summary>
-        public long ReadLong()
-        {
-            return ReadValueInternal<long>();
-        }
-        /// <summary>
-        /// Reads a 64-bit unsigned integer from the current packet.
-        /// </summary>
-        public ulong ReadULong()
-        {
-            return ReadValueInternal<ulong>();
-        }
-        /// <summary>
-        /// Reads a 16-bit signed integer from the current packet.
-        /// </summary>
-        public short ReadShort()
-        {
-            return ReadValueInternal<short>();
-        }
-        /// <summary>
-        /// Reads a 16-bit unsigned integer from the current packet.
-        /// </summary>
-        public ushort ReadUShort()
-        {
-            return ReadValueInternal<ushort>();
-        }
         /// <summary>
         /// Reads a byte-array from the current packet. Length is automatically read as an uint16.
         /// </summary>
@@ -157,10 +94,10 @@ namespace ByteStream.Mananged
         /// Reads a string as a double-byte character set. Each character requires 2 bytes.
         /// Does NOT automatically read length.
         /// </summary>
-        public string ReadDBCS(int stringLength)
+        public string ReadString(int stringLength)
         {
             EnsureCapacity(stringLength * sizeof(char));
-            string val = BinaryHelper.ReadDBCS(m_buffer, m_offset, stringLength);
+            string val = StringHelper.ReadString(m_buffer, m_offset, stringLength);
 
             m_offset += stringLength * sizeof(char);
             return val;
@@ -172,7 +109,7 @@ namespace ByteStream.Mananged
         public string ReadASCII(int stringLength)
         {
             EnsureCapacity(stringLength);
-            string val = BinaryHelper.ReadASCII(m_buffer, m_offset, stringLength);
+            string val = StringHelper.ReadASCII(m_buffer, m_offset, stringLength);
 
             m_offset += stringLength;
             return val;
@@ -180,10 +117,10 @@ namespace ByteStream.Mananged
         /// <summary>
         /// Reads a string as a double-byte character set. Length is automatically retrieved as an uint16.
         /// </summary>
-        public string ReadDBCSLength()
+        public string ReadStringLength()
         {
             ushort lengh = Read<ushort>();
-            return ReadDBCS(Length);
+            return ReadString(Length);
         }
         /// <summary>
         /// Reads a string in ASCII encoding. Length is automatically retrieved as an uint16.
@@ -200,7 +137,7 @@ namespace ByteStream.Mananged
         {
             ushort length = Read<ushort>();
             EnsureCapacity(length);
-            string val = BinaryHelper.ReadUTF8(m_buffer, m_offset, length);
+            string val = StringHelper.ReadUTF8(m_buffer, m_offset, length);
 
             m_offset += length;
             return val;
@@ -213,10 +150,28 @@ namespace ByteStream.Mananged
         {
             ushort length = Read<ushort>();
             EnsureCapacity(length);
-            string val = BinaryHelper.ReadUTF16(m_buffer, m_offset, length);
+            string val = StringHelper.ReadUTF16(m_buffer, m_offset, length);
 
             m_offset += length;
             return val;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal unsafe T ReadValueInternal<T>() where T : unmanaged
+        {
+            int size = sizeof(T);
+            EnsureCapacity(size);
+            T val = BinaryHelper.Read<T>(m_buffer, m_offset);
+
+            m_offset += size;
+            return val;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void EnsureCapacity(int bytesToRead)
+        {
+            if (bytesToRead + m_offset > m_buffer.Length)
+            { throw new InvalidOperationException("Read operation exceeds buffer size!"); }
         }
     }
 }

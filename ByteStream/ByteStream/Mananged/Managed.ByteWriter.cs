@@ -7,155 +7,119 @@ using System.Text;
 
 namespace ByteStream.Mananged
 {
-    /// <summary>
-    /// A writer used to write values to a byte array.
-    /// </summary>
-    public class ByteWriter : ByteWriterLight
+    public class ByteWriterLight : IWriter
     {
+        private const int DEFAULTSIZE = 64;
+
+#pragma warning disable IDE0032
+        protected byte[] m_buffer;
+        protected int m_offset;
+        protected bool m_isFixedSize;
+#pragma warning restore IDE0032
+
+        /// <summary>
+        /// The length of this writer.
+        /// </summary>
+        public int Length
+            => m_buffer.Length;
+        /// <summary>
+        /// The current write offset.
+        /// </summary>
+        public int Offset
+            => m_offset;
+        /// <summary>
+        /// Determines if this writer has a fixed size.
+        /// </summary>
+        public bool IsFixedSize
+            => m_isFixedSize;
+        /// <summary>
+        /// Gets the internal buffer used by this writer.
+        /// Do not modify the buffer while performing write operations.
+        /// </summary>
+        public byte[] Buffer
+            => m_buffer;
+
         /// <summary>
         /// Creates a new instance of bytewriter with an empty buffer.
         /// </summary>
-        public ByteWriter()
-            : base() { }
+        public ByteWriterLight() : this(DEFAULTSIZE, true)
+        { }
         /// <summary>
         /// Creates a new instance of bytewriter with an empty byffer.
         /// </summary>
         /// <param name="initialSize">The initial size of the buffer.</param>
         /// <param name="isFixedSize">Determines if the buffer is allowed to increase its size automatically.</param>
-        public ByteWriter(int initialSize, bool isFixedSize)
-            : base(initialSize, isFixedSize) { }
-
+        public ByteWriterLight(int initialSize, bool isFixedSize)
+        {
+            m_buffer = new byte[initialSize.NextPowerOfTwo()];
+            m_isFixedSize = isFixedSize;
+            m_offset = 0;
+        }
         /// <summary>
         /// Creates a new instance of bytewriter from an existing buffer.
         /// </summary>
         /// <param name="buffer">The buffer to use with this writer.</param>
-        public ByteWriter(byte[] buffer)
-            : base(buffer, true) { }
+        public ByteWriterLight(byte[] buffer) : this(buffer, true)
+        { }
         /// <summary>
         /// Creates a new instance of bytewriter from an existing buffer.
         /// </summary>
         /// <param name="buffer">The buffer to use with this writer.</param>
         /// <param name="isFixedSize">Determines if the buffer is allowed to increase its size automatically.</param>
-        public ByteWriter(byte[] buffer, bool isFixedSize)
-            : base(buffer, isFixedSize) { }
+        public ByteWriterLight(byte[] buffer, bool isFixedSize)
+        {
+            m_buffer = buffer ?? throw new ArgumentNullException("buffer");
+            m_isFixedSize = isFixedSize;
+            m_offset = 0;
+        }
 
         /// <summary>
-        /// Writes a boolean value.
+        /// Increases the write offset by some amount.
         /// </summary>
-        /// <param name="value"></param>
-        public void WriteBool(bool value)
+        /// <param name="amount">The amounts of bytes to skip.</param>
+        public void SkipBytes(int amount)
         {
-            EnsureCapacity(sizeof(bool));
-            BinaryHelper.WriteBool(m_buffer, m_offset, value);
-            m_offset += sizeof(bool);
+            if (amount < 1)
+            { throw new ArgumentOutOfRangeException("amount"); }
+
+            EnsureCapacity(amount);
+            m_offset += amount;
         }
         /// <summary>
-        /// Writes a 8-bit signed integer.
+        /// Resizes the current buffer.
+        /// Performs an array copy.
         /// </summary>
-        /// <param name="value"></param>
-        public void WriteSByte(sbyte value)
+        /// <param name="newSize">The new size of the buffer.</param>
+        public void Resize(int newSize)
         {
-            EnsureCapacity(sizeof(sbyte));
-            BinaryHelper.WriteSByte(m_buffer, m_offset, value);
-            m_offset += sizeof(sbyte);
+            if (newSize < 0)
+            { throw new ArgumentOutOfRangeException("newSize"); }
+            if (newSize < m_offset)
+            { throw new InvalidOperationException("New size is smaller than the current write offset!"); }
+
+            ArrayExtensions.ResizeUnsafe(ref m_buffer, newSize);
         }
         /// <summary>
-        /// Writes a 8-bit unsigned integer.
+        /// Resizes the current buffer to the current write offset.
+        /// Performs an array copy.
         /// </summary>
-        /// <param name="value"></param>
-        public void WriteByte(byte value)
+        public void Trim()
         {
-            EnsureCapacity(sizeof(byte));
-            BinaryHelper.WriteByte(m_buffer, m_offset, value);
-            m_offset += sizeof(byte);
+            ArrayExtensions.ResizeUnsafe(ref m_buffer, m_offset);
         }
         /// <summary>
-        /// Writes a char in 2 bytes.
+        /// Resets the offset to zero.
         /// </summary>
-        /// <param name="value"></param>
-        public void WriteChar(char value)
+        public void Clear()
         {
-            WriteValueInternal(value);
+            m_offset = 0;
         }
+
         /// <summary>
-        /// Writes a char in a single byte. (Default is 2)
+        /// Writes a blittable struct or primitive value to the buffer.
         /// </summary>
-        /// <param name="value"></param>
-        public void WriteCharSingle(char value)
-        {
-            EnsureCapacity(sizeof(byte));
-            BinaryHelper.WriteByte(m_buffer, m_offset, (byte)value);
-            m_offset += sizeof(byte);
-        }
-        /// <summary>
-        /// Writes a decimal as 4 32-bit integers.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteDecimal(decimal value)
-        {
-            WriteValueInternal(value);
-        }
-        /// <summary>
-        /// Writes a double.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteDouble(double value)
-        {
-            WriteValueInternal(value);
-        }
-        /// <summary>
-        /// Writes a floating precision point.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteSingle(float value)
-        {
-            WriteValueInternal(value);
-        }
-        /// <summary>
-        /// Writes a 32-bit signed integer.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteInt(int value)
-        {
-            WriteValueInternal(value);
-        }
-        /// <summary>
-        /// Writes a 32-bit unsigned integer.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteUInt(uint value)
-        {
-            WriteValueInternal(value);
-        }
-        /// <summary>
-        /// Writes a 64-bit signed integer.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteLong(long value)
-        {
-            WriteValueInternal(value);
-        }
-        /// <summary>
-        /// Writes a 64-bit unsigned integer.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteULong(ulong value)
-        {
-            WriteValueInternal(value);
-        }
-        /// <summary>
-        /// Writes a 16-bit signed integer.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteShort(short value)
-        {
-            WriteValueInternal(value);
-        }
-        /// <summary>
-        /// Writes a 16-bit unsigned integer.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteUShort(ushort value)
+        /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
+        public void Write<T>(T value) where T : unmanaged
         {
             WriteValueInternal(value);
         }
@@ -187,7 +151,7 @@ namespace ByteStream.Mananged
         public void WriteDBCS(string value)
         {
             EnsureCapacity(value.Length * sizeof(char));
-            BinaryHelper.WriteDBCS(m_buffer, m_offset, value);
+            StringHelper.WriteString(m_buffer, m_offset, value);
             m_offset += value.Length * sizeof(char);
         }
         /// <summary>
@@ -198,7 +162,7 @@ namespace ByteStream.Mananged
         public void WriteASCII(string value)
         {
             EnsureCapacity(value.Length);
-            BinaryHelper.WriteASCII(m_buffer, m_offset, value);
+            StringHelper.WriteASCII(m_buffer, m_offset, value);
             m_offset += value.Length;
         }
         /// <summary>
@@ -228,10 +192,10 @@ namespace ByteStream.Mananged
             int byteSize = Encoding.UTF8.GetByteCount(value);
 
             EnsureCapacity(byteSize + sizeof(ushort));
-            BinaryHelper.WriteValue(m_buffer, m_offset, (ushort)value.Length);
+            BinaryHelper.Write(m_buffer, m_offset, (ushort)value.Length);
             m_offset += sizeof(ushort);
 
-            BinaryHelper.WriteUTF8(m_buffer, m_offset, value);
+            StringHelper.WriteUTF8(m_buffer, m_offset, value);
             m_offset += byteSize;
         }
         /// <summary>
@@ -243,11 +207,107 @@ namespace ByteStream.Mananged
             int byteSize = Encoding.Unicode.GetByteCount(value);
 
             EnsureCapacity(byteSize + sizeof(ushort));
-            BinaryHelper.WriteValue(m_buffer, m_offset, (ushort)value.Length);
+            BinaryHelper.Write(m_buffer, m_offset, (ushort)value.Length);
             m_offset += sizeof(ushort);
 
-            BinaryHelper.WriteUTF16(m_buffer, m_offset, value);
+            StringHelper.WriteUTF16(m_buffer, m_offset, value);
             m_offset += byteSize;
+        }
+
+        /// <summary>
+        /// Copies the inner buffer to a supplied buffer.
+        /// </summary>
+        /// <param name="buffer">The destination for the data.</param>
+        public void CopyToBytes(byte[] buffer)
+        {
+            if (buffer == null)
+            { throw new ArgumentNullException("buffer"); }
+
+            if (buffer.Length < m_offset)
+            { throw new ArgumentOutOfRangeException("destinationIndex", "Copy action exceeds the supplied buffer!"); }
+
+            m_buffer.CopyToUnsafe(0, buffer, 0, m_offset);
+        }
+        /// <summary>
+        /// Copies the inner buffer to a supplied buffer.
+        /// </summary>
+        /// <param name="buffer">The destination for the data.</param>
+        public void CopyToBytes(byte[] buffer, int destinationIndex)
+        {
+            if (buffer == null)
+            { throw new ArgumentNullException("buffer"); }
+
+            if (buffer.Length < destinationIndex + m_offset)
+            { throw new ArgumentOutOfRangeException("destinationIndex", "Copy action exceeds the supplied buffer!"); }
+
+            if (destinationIndex < 0)
+            { throw new ArgumentOutOfRangeException("destinationIndex"); }
+
+            m_buffer.CopyToUnsafe(0, buffer, destinationIndex, m_offset);
+        }
+        /// <summary>
+        /// Copies the inner buffer to a supplied buffer.
+        /// </summary>
+        /// <param name="buffer">The destination for the data.</param>
+        /// <param name="length">The total length to copy (starting from 0)</param>
+        public void CopyToBytes(byte[] buffer, int destinationIndex, int length)
+        {
+            if (buffer == null)
+            { throw new ArgumentNullException("buffer"); }
+
+            if (buffer.Length < destinationIndex + length)
+            { throw new ArgumentOutOfRangeException("destinationIndex", "Copy action exceeds the supplied buffer!"); }
+
+            if (destinationIndex < 0)
+            { throw new ArgumentOutOfRangeException("destinationIndex"); }
+
+            if (length < 1 || length > Length)
+            { throw new ArgumentOutOfRangeException("length"); }
+
+            m_buffer.CopyToUnsafe(0, buffer, destinationIndex, length);
+        }
+        /// <summary>
+        /// Copies the inner buffer to a supplied buffer.
+        /// </summary>
+        /// <param name="buffer">The destination for the data.</param>
+        public void CopyToPtr(IntPtr ptr)
+        {
+            if (ptr == IntPtr.Zero)
+            { throw new ArgumentNullException("buffer"); }
+
+            Memory.CopyMemory(m_buffer, m_offset, ptr, 0, m_offset);
+        }
+        /// <summary>
+        /// Copies the inner buffer to a supplied buffer.
+        /// </summary>
+        /// <param name="buffer">The destination for the data.</param>
+        public void CopyToPtr(IntPtr ptr, int destinationIndex)
+        {
+            if (ptr == IntPtr.Zero)
+            { throw new ArgumentNullException("buffer"); }
+
+            if (destinationIndex < 0)
+            { throw new ArgumentOutOfRangeException("destinationIndex"); }
+
+            Memory.CopyMemory(m_buffer, m_offset, ptr, destinationIndex, m_offset);
+        }
+        /// <summary>
+        /// Copies the inner buffer to a supplied buffer.
+        /// </summary>
+        /// <param name="buffer">The destination for the data.</param>
+        /// <param name="length">The total length to copy (starting from 0)</param>
+        public void CopyToPtr(IntPtr ptr, int destinationIndex, int length)
+        {
+            if (ptr == IntPtr.Zero)
+            { throw new ArgumentNullException("buffer"); }
+
+            if (destinationIndex < 0)
+            { throw new ArgumentOutOfRangeException("destinationIndex"); }
+
+            if (length < 1 || length > Length)
+            { throw new ArgumentOutOfRangeException("length"); }
+
+            Memory.CopyMemory(m_buffer, m_offset, ptr, destinationIndex, length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -255,7 +315,7 @@ namespace ByteStream.Mananged
         {
             int size = sizeof(T);
             EnsureCapacity(size);
-            BinaryHelper.WriteValue(m_buffer, m_offset, value);
+            BinaryHelper.Write(m_buffer, m_offset, value);
             m_offset += size;
         }
 

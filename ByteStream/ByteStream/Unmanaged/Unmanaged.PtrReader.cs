@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace ByteStream.Unmanaged
 {
-    public class IntPtrReader : IReader
+    public class PtrReader : IReader
     {
 #pragma warning disable IDE0032
         private int m_length;
@@ -34,7 +34,7 @@ namespace ByteStream.Unmanaged
         /// </summary>
         /// <param name="buffer">The data to be read by this bytereader.</param>
         /// <param name="bufferLength">The amount of bytes that can be read.</param>
-        public IntPtrReader(IntPtr buffer, int bufferLength)
+        public PtrReader(IntPtr buffer, int bufferLength)
         {
             if (buffer == IntPtr.Zero) { throw new ArgumentNullException("buffer"); }
             if (bufferLength < 1) { throw new ArgumentOutOfRangeException("bufferLength"); }
@@ -65,121 +65,6 @@ namespace ByteStream.Unmanaged
         }
 
         /// <summary>
-        /// Reads a boolean from the current packet.
-        /// </summary>
-        public bool ReadBool()
-        {
-            EnsureCapacity(sizeof(bool));
-            bool val = BinaryHelper.ReadBool(m_buffer, m_offset);
-
-            m_offset += sizeof(bool);
-            return val;
-        }
-        /// <summary>
-        /// Reads a 8-bit unsigned integer from the current packet.
-        /// </summary>
-        public byte ReadByte()
-        {
-            EnsureCapacity(sizeof(byte));
-            byte val = BinaryHelper.ReadByte(m_buffer, m_offset);
-
-            m_offset += sizeof(byte);
-            return val;
-        }
-        /// <summary>
-        /// Reads a 8-bit signed integer from the current packet.
-        /// </summary>
-        public sbyte ReadSByte()
-        {
-            EnsureCapacity(sizeof(sbyte));
-            sbyte val = BinaryHelper.ReadSByte(m_buffer, m_offset);
-
-            m_offset += sizeof(sbyte);
-            return val;
-        }
-        /// <summary>
-        /// Reads a character from the current packet. Uses 2 bytes.
-        /// </summary>
-        public char ReadChar()
-        {
-            return ReadValueInternal<char>();
-        }
-        /// <summary>
-        /// Reads a character from the current packet. Uses 1 byte (default is 2).
-        /// </summary>
-        /// <returns></returns>
-        public char ReadCharSingle()
-        {
-            EnsureCapacity(sizeof(byte));
-            char val = BinaryHelper.ReadCharSingle(m_buffer, m_offset);
-
-            m_offset += sizeof(byte);
-            return val;
-        }
-        /// <summary>
-        /// Reads a decimal from the current packet as 4 32-bit unsigned integers.
-        /// </summary>
-        public decimal ReadDecimal()
-        {
-            return ReadValueInternal<decimal>();
-        }
-        /// <summary>
-        /// Reads a double from the current packet.
-        /// </summary>
-        public double ReadDouble()
-        {
-            return ReadValueInternal<double>();
-        }
-        /// <summary>
-        /// Reads a floating precision point from the current packet.
-        /// </summary>
-        public float ReadSingle()
-        {
-            return ReadValueInternal<float>();
-        }
-        /// <summary>
-        /// Reads a 32-bit signed integer from the current packet.
-        /// </summary>
-        public int ReadInt()
-        {
-            return ReadValueInternal<int>();
-        }
-        /// <summary>
-        /// Reads a 32-bit unsigned integer from the current packet.
-        /// </summary>
-        public uint ReadUInt()
-        {
-            return ReadValueInternal<uint>();
-        }
-        /// <summary>
-        /// Reads a 64-bit signed integer from the current packet.
-        /// </summary>
-        public long ReadLong()
-        {
-            return ReadValueInternal<long>();
-        }
-        /// <summary>
-        /// Reads a 64-bit unsigned integer from the current packet.
-        /// </summary>
-        public ulong ReadULong()
-        {
-            return ReadValueInternal<ulong>();
-        }
-        /// <summary>
-        /// Reads a 16-bit signed integer from the current packet.
-        /// </summary>
-        public short ReadShort()
-        {
-            return ReadValueInternal<short>();
-        }
-        /// <summary>
-        /// Reads a 16-bit unsigned integer from the current packet.
-        /// </summary>
-        public ushort ReadUShort()
-        {
-            return ReadValueInternal<ushort>();
-        }
-        /// <summary>
         /// Reads a byte-array from the current packet. Length is automatically read as an uint16.
         /// </summary>
         public byte[] ReadBytesLength()
@@ -205,10 +90,10 @@ namespace ByteStream.Unmanaged
         /// Reads a string as a double-byte character set. Each character requires 2 bytes.
         /// Does NOT automatically read length.
         /// </summary>
-        public string ReadDBCS(int stringLength)
+        public string ReadString(int stringLength)
         {
             EnsureCapacity(stringLength * sizeof(char));
-            string val = BinaryHelper.ReadDBCS(m_buffer, m_offset, stringLength);
+            string val = StringHelper.ReadString(m_buffer, m_offset, stringLength);
 
             m_offset += stringLength * sizeof(char);
             return val;
@@ -220,7 +105,7 @@ namespace ByteStream.Unmanaged
         public string ReadASCII(int stringLength)
         {
             EnsureCapacity(stringLength);
-            string val = BinaryHelper.ReadASCII(m_buffer, m_offset, stringLength);
+            string val = StringHelper.ReadASCII(m_buffer, m_offset, stringLength);
 
             m_offset += stringLength;
             return val;
@@ -228,10 +113,10 @@ namespace ByteStream.Unmanaged
         /// <summary>
         /// Reads a string as a double-byte character set. Length is automatically retrieved as an uint16.
         /// </summary>
-        public string ReadDBCSLength()
+        public string ReadStringLength()
         {
             ushort lengh = Read<ushort>();
-            return ReadDBCS(Length);
+            return ReadString(Length);
         }
         /// <summary>
         /// Reads a string in ASCII encoding. Length is automatically retrieved as an uint16.
@@ -248,7 +133,7 @@ namespace ByteStream.Unmanaged
         {
             ushort length = Read<ushort>();
             EnsureCapacity(length);
-            string val = BinaryHelper.ReadUTF8(m_buffer, m_offset, length);
+            string val = StringHelper.ReadUTF8(m_buffer, m_offset, length);
 
             m_offset += length;
             return val;
@@ -261,7 +146,7 @@ namespace ByteStream.Unmanaged
         {
             ushort length = Read<ushort>();
             EnsureCapacity(length);
-            string val = BinaryHelper.ReadUTF16(m_buffer, m_offset, length);
+            string val = StringHelper.ReadUTF16(m_buffer, m_offset, length);
 
             m_offset += length;
             return val;
@@ -281,7 +166,7 @@ namespace ByteStream.Unmanaged
         {
             int size = sizeof(T);
             EnsureCapacity(size);
-            T val = BinaryHelper.ReadValue<T>(m_buffer, m_offset);
+            T val = BinaryHelper.Read<T>(m_buffer, m_offset);
 
             m_offset += size;
             return val;

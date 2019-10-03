@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ByteStream.Utils;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -246,7 +247,7 @@ namespace ByteStream
 
             byte[] result = new byte[length];
 
-            bin.CopyUnsafe(offset, result, 0, length);
+            bin.CopyToUnsafe(offset, result, 0, length);
             return result;
         }
         /// <summary>
@@ -483,7 +484,7 @@ namespace ByteStream
         /// <param name="value">The value to write to the destination.</param>
         public static void WriteBytes(byte[] dest, int offset, byte[] value)
         {
-            value.CopyUnsafe(0, dest, offset, value.Length);
+            value.CopyToUnsafe(0, dest, offset, value.Length);
         }
         /// <summary>
         /// Clears a given number of bytes.

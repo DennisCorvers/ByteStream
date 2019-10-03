@@ -31,9 +31,9 @@ namespace ByteStream.Utils
         /// Resizes a pointer using Marshal alloc.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ResizePtr(IntPtr ptr, int newSize)
+        public static IntPtr ResizePtr(IntPtr ptr, int newSize)
         {
-            Marshal.ReAllocHGlobal(ptr, (IntPtr)newSize);
+            return Marshal.ReAllocHGlobal(ptr, (IntPtr)newSize);
         }
         /// <summary>
         /// Copies memory between pointers. DOES NOT CHECK BOUNDARIES OR NULL!

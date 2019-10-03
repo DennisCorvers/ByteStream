@@ -1,15 +1,15 @@
 ﻿using ByteStream.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
 
-namespace ByteStream.Mananged
+namespace ByteStream.Unmanaged
 {
-    public class ByteReader : IReader
+    public class IntPtrReader : IReader
     {
 #pragma warning disable IDE0032
-        protected byte[] m_buffer;
+        private int m_length;
+
+        protected IntPtr m_buffer;
         protected int m_offset;
 #pragma warning restore IDE0032
 
@@ -17,7 +17,7 @@ namespace ByteStream.Mananged
         /// The length of this reader.
         /// </summary>
         public int Length
-            => m_buffer.Length;
+            => m_length;
         /// <summary>
         /// The current read offset.
         /// </summary>
@@ -32,11 +32,16 @@ namespace ByteStream.Mananged
         /// <summary>
         /// Creates a new instance of bytereader.
         /// </summary>
-        /// <param name="data">The data to be read by this bytereader.</param>
-        public ByteReader(byte[] data)
+        /// <param name="buffer">The data to be read by this bytereader.</param>
+        /// <param name="bufferLength">The amount of bytes that can be read.</param>
+        public IntPtrReader(IntPtr buffer, int bufferLength)
         {
-            m_buffer = data ?? throw new ArgumentNullException("data");
+            if (buffer == IntPtr.Zero) { throw new ArgumentNullException("buffer"); }
+            if (bufferLength < 1) { throw new ArgumentOutOfRangeException("bufferLength"); }
+
             m_offset = 0;
+            m_length = bufferLength;
+            m_buffer = buffer;
         }
 
         /// <summary>
@@ -285,7 +290,7 @@ namespace ByteStream.Mananged
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureCapacity(int bytesToRead)
         {
-            if (bytesToRead + m_offset > m_buffer.Length)
+            if (bytesToRead + m_offset > m_length)
             { throw new InvalidOperationException("Read operation exceeds buffer size!"); }
         }
     }

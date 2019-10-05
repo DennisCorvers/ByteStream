@@ -7,7 +7,7 @@ using System.Text;
 
 namespace ByteStream.Mananged
 {
-    public class ByteWriterLight : IWriter
+    public class ByteWriter : IWriter
     {
         private const int DEFAULTSIZE = 64;
 
@@ -42,14 +42,14 @@ namespace ByteStream.Mananged
         /// <summary>
         /// Creates a new instance of bytewriter with an empty buffer.
         /// </summary>
-        public ByteWriterLight() : this(DEFAULTSIZE, true)
+        public ByteWriter() : this(DEFAULTSIZE, true)
         { }
         /// <summary>
         /// Creates a new instance of bytewriter with an empty byffer.
         /// </summary>
         /// <param name="initialSize">The initial size of the buffer.</param>
         /// <param name="isFixedSize">Determines if the buffer is allowed to increase its size automatically.</param>
-        public ByteWriterLight(int initialSize, bool isFixedSize)
+        public ByteWriter(int initialSize, bool isFixedSize)
         {
             m_buffer = new byte[initialSize.NextPowerOfTwo()];
             m_isFixedSize = isFixedSize;
@@ -59,14 +59,14 @@ namespace ByteStream.Mananged
         /// Creates a new instance of bytewriter from an existing buffer.
         /// </summary>
         /// <param name="buffer">The buffer to use with this writer.</param>
-        public ByteWriterLight(byte[] buffer) : this(buffer, true)
+        public ByteWriter(byte[] buffer) : this(buffer, true)
         { }
         /// <summary>
         /// Creates a new instance of bytewriter from an existing buffer.
         /// </summary>
         /// <param name="buffer">The buffer to use with this writer.</param>
         /// <param name="isFixedSize">Determines if the buffer is allowed to increase its size automatically.</param>
-        public ByteWriterLight(byte[] buffer, bool isFixedSize)
+        public ByteWriter(byte[] buffer, bool isFixedSize)
         {
             m_buffer = buffer ?? throw new ArgumentNullException("buffer");
             m_isFixedSize = isFixedSize;
@@ -125,15 +125,6 @@ namespace ByteStream.Mananged
         }
 
         /// <summary>
-        /// Writes a byte array. Includes the length as uint16.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteBytesLength(byte[] value)
-        {
-            Write((ushort)value.Length);
-            WriteBytes(value);
-        }
-        /// <summary>
         /// Writes a byte array. Does NOT include the length.
         /// </summary>
         /// <param name="value"></param>
@@ -144,44 +135,54 @@ namespace ByteStream.Mananged
             m_offset += value.Length;
         }
         /// <summary>
+        /// Writes a byte array. Includes the length as uint16.
+        /// </summary>
+        /// <param name="value"></param>
+        public void WriteBytesLength(byte[] value)
+        {
+            Write((ushort)value.Length);
+            WriteBytes(value);
+        }
+
+        /// <summary>
         /// Writes a string as a double-byte character set. Each character requires 2 bytes.
         /// Does NOT include the length.
         /// </summary>
         /// <param name="value"></param>
-        public void WriteDBCS(string value)
+        public void WriteUTF16(string value)
         {
             EnsureCapacity(value.Length * sizeof(char));
-            StringHelper.WriteString(m_buffer, m_offset, value);
+            StringHelper.WriteUTF16(m_buffer, m_offset, value);
             m_offset += value.Length * sizeof(char);
-        }
-        /// <summary>
-        /// Writes a string in ASCII encoding. Each character requires 1 byte.
-        /// Does NOT include the length.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteASCII(string value)
-        {
-            EnsureCapacity(value.Length);
-            StringHelper.WriteASCII(m_buffer, m_offset, value);
-            m_offset += value.Length;
         }
         /// <summary>
         /// Writes a string as a double-byte character set. Includes the length of the string as an uint16.
         /// </summary>
         /// <param name="value"></param>
-        public void WriteDBCSLength(string value)
+        public void WriteUTF16Length(string value)
         {
             Write((ushort)value.Length);
-            WriteDBCS(value);
+            WriteUTF16(value);
         }
         /// <summary>
-        /// Writes a string in ASCII encoding. Includes the length of the string as an uint16.
+        /// Writes a string in ANSI encoding. Each character requires 1 byte.
+        /// Does NOT include the length.
         /// </summary>
         /// <param name="value"></param>
-        public void WriteASCIILength(string value)
+        public void WriteANSI(string value)
+        {
+            EnsureCapacity(value.Length);
+            StringHelper.WriteANSI(m_buffer, m_offset, value);
+            m_offset += value.Length;
+        }
+        /// <summary>
+        /// Writes a string in ANSI encoding. Includes the length of the string as an uint16.
+        /// </summary>
+        /// <param name="value"></param>
+        public void WriteANSILength(string value)
         {
             Write((ushort)value.Length);
-            WriteASCII(value);
+            WriteANSI(value);
         }
         /// <summary>
         /// Writes a string in UTF8 encoding. Includes the length of the string as an uint16.
@@ -196,21 +197,6 @@ namespace ByteStream.Mananged
             m_offset += sizeof(ushort);
 
             StringHelper.WriteUTF8(m_buffer, m_offset, value);
-            m_offset += byteSize;
-        }
-        /// <summary>
-        /// Writes a string in UTF16 encoding. Includes the length of the string as an uint16.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteUTF16(string value)
-        {
-            int byteSize = Encoding.Unicode.GetByteCount(value);
-
-            EnsureCapacity(byteSize + sizeof(ushort));
-            BinaryHelper.Write(m_buffer, m_offset, (ushort)value.Length);
-            m_offset += sizeof(ushort);
-
-            StringHelper.WriteUTF16(m_buffer, m_offset, value);
             m_offset += byteSize;
         }
 

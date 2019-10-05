@@ -71,7 +71,7 @@ namespace ByteStream.Mananged
         /// <summary>
         /// Reads a byte-array from the current packet. Length is automatically read as an uint16.
         /// </summary>
-        public byte[] ReadBytesLength()
+        public byte[] ReadBytes()
         {
             ushort length = Read<ushort>();
             return ReadBytes(length);
@@ -90,46 +90,49 @@ namespace ByteStream.Mananged
             m_offset += length;
             return val;
         }
+
+        /// <summary>
+        /// Reads a string as a double-byte character set. Length is automatically retrieved as an uint16.
+        /// </summary>
+        public string ReadUTF16()
+        {
+            ushort lengh = Read<ushort>();
+            return ReadUTF16(Length);
+        }
         /// <summary>
         /// Reads a string as a double-byte character set. Each character requires 2 bytes.
         /// Does NOT automatically read length.
         /// </summary>
-        public string ReadString(int stringLength)
+        public string ReadUTF16(int stringLength)
         {
             EnsureCapacity(stringLength * sizeof(char));
-            string val = StringHelper.ReadString(m_buffer, m_offset, stringLength);
+            string val = StringHelper.ReadUTF16(m_buffer, m_offset, stringLength);
 
             m_offset += stringLength * sizeof(char);
             return val;
         }
+
         /// <summary>
-        /// Reads a string in ASCII encoding. Each character requires 1 byte.
+        /// Reads a string in ANSI encoding. Length is automatically retrieved as an uint16.
+        /// </summary>
+        public string ReadANSI()
+        {
+            ushort length = Read<ushort>();
+            return ReadANSI(length);
+        }
+        /// <summary>
+        /// Reads a string in ANSI encoding. Each character requires 1 byte.
         /// Does NOT automatically read length.
         /// </summary>
-        public string ReadASCII(int stringLength)
+        public string ReadANSI(int stringLength)
         {
             EnsureCapacity(stringLength);
-            string val = StringHelper.ReadASCII(m_buffer, m_offset, stringLength);
+            string val = StringHelper.ReadANSI(m_buffer, m_offset, stringLength);
 
             m_offset += stringLength;
             return val;
         }
-        /// <summary>
-        /// Reads a string as a double-byte character set. Length is automatically retrieved as an uint16.
-        /// </summary>
-        public string ReadStringLength()
-        {
-            ushort lengh = Read<ushort>();
-            return ReadString(Length);
-        }
-        /// <summary>
-        /// Reads a string in ASCII encoding. Length is automatically retrieved as an uint16.
-        /// </summary>
-        public string ReadASCIILength()
-        {
-            ushort length = Read<ushort>();
-            return ReadASCII(length);
-        }
+
         /// <summary>
         /// Reads a string in UTF8 encoding. Length is automatically retrieved as an uint16.
         /// </summary>
@@ -138,19 +141,6 @@ namespace ByteStream.Mananged
             ushort length = Read<ushort>();
             EnsureCapacity(length);
             string val = StringHelper.ReadUTF8(m_buffer, m_offset, length);
-
-            m_offset += length;
-            return val;
-
-        }
-        /// <summary>
-        /// Reads a string in UTF16 encoding. Length is automatically retrieved as an uint16.
-        /// </summary>
-        public string ReadUTF16()
-        {
-            ushort length = Read<ushort>();
-            EnsureCapacity(length);
-            string val = StringHelper.ReadUTF16(m_buffer, m_offset, length);
 
             m_offset += length;
             return val;

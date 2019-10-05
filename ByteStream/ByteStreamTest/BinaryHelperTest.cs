@@ -55,8 +55,8 @@ namespace ByteStreamTest
             [Test]
             public void StructTest()
             {
-                BlittableStruct dat = new BlittableStruct() { ValOne = 15423, ValTwo = true, ValThree = 9170 };
-                int length = 11;
+                BlittableStruct dat = new BlittableStruct() { ValOne = int.MaxValue, ValTwo = 123, ValThree = 321 };
+                int length = 16;
 
                 for (int i = 0; i < 4 * length; i += length)
                 { BinaryHelper.Write(m_buffer, i, dat); }
@@ -111,8 +111,8 @@ namespace ByteStreamTest
             [Test]
             public void StructTest()
             {
-                BlittableStruct dat = new BlittableStruct() { ValOne = 15423, ValTwo = true, ValThree = 9170 };
-                int length = 11;
+                BlittableStruct dat = new BlittableStruct() { ValOne = int.MaxValue, ValTwo = 123, ValThree = 321 };
+                int length = 16;
 
                 for (int i = 0; i < 4 * length; i += length)
                 { BinaryHelper.Write(m_buffer, i, dat); }

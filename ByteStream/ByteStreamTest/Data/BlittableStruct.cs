@@ -5,15 +5,12 @@ using System.Text;
 
 namespace ByteStreamTest.Data
 {
-    [StructLayout(LayoutKind.Explicit, Size = 11)]
+    [StructLayout(LayoutKind.Sequential)]
     public struct BlittableStruct
     {
-        [FieldOffset(0)]
         public double ValOne;
-        [FieldOffset(8)]
-        public bool ValTwo;
-        [FieldOffset(9)]
-        public short ValThree;
+        public byte ValTwo;
+        public ushort ValThree;
 
         public bool IsEqual(BlittableStruct other)
         {

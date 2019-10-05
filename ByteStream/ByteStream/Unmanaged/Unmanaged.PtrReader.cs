@@ -90,22 +90,22 @@ namespace ByteStream.Unmanaged
         /// Reads a string as a double-byte character set. Each character requires 2 bytes.
         /// Does NOT automatically read length.
         /// </summary>
-        public string ReadString(int stringLength)
+        public string ReadUTF16(int stringLength)
         {
             EnsureCapacity(stringLength * sizeof(char));
-            string val = StringHelper.ReadString(m_buffer, m_offset, stringLength);
+            string val = StringHelper.ReadUTF16(m_buffer, m_offset, stringLength);
 
             m_offset += stringLength * sizeof(char);
             return val;
         }
         /// <summary>
-        /// Reads a string in ASCII encoding. Each character requires 1 byte.
+        /// Reads a string in ANSI encoding. Each character requires 1 byte.
         /// Does NOT automatically read length.
         /// </summary>
-        public string ReadASCII(int stringLength)
+        public string ReadANSI(int stringLength)
         {
             EnsureCapacity(stringLength);
-            string val = StringHelper.ReadASCII(m_buffer, m_offset, stringLength);
+            string val = StringHelper.ReadANSI(m_buffer, m_offset, stringLength);
 
             m_offset += stringLength;
             return val;
@@ -113,18 +113,18 @@ namespace ByteStream.Unmanaged
         /// <summary>
         /// Reads a string as a double-byte character set. Length is automatically retrieved as an uint16.
         /// </summary>
-        public string ReadStringLength()
+        public string ReadUTF16Length()
         {
             ushort lengh = Read<ushort>();
-            return ReadString(Length);
+            return ReadUTF16(Length);
         }
         /// <summary>
-        /// Reads a string in ASCII encoding. Length is automatically retrieved as an uint16.
+        /// Reads a string in ANSI encoding. Length is automatically retrieved as an uint16.
         /// </summary>
-        public string ReadASCIILength()
+        public string ReadANSILength()
         {
             ushort length = Read<ushort>();
-            return ReadASCII(length);
+            return ReadANSI(length);
         }
         /// <summary>
         /// Reads a string in UTF8 encoding. Length is automatically retrieved as an uint16.

@@ -25,27 +25,27 @@ namespace ByteStreamTest
             }
 
             [TestCase("手機瀏覽")]
-            public void StringTest(string value)
+            public void UTF16Test(string value)
             {
                 int length = value.Length * sizeof(char);
 
                 for (int i = 0; i < 4 * length; i += length)
-                { StringHelper.WriteString(m_buffer, i, value); }
+                { StringHelper.WriteUTF16(m_buffer, i, value); }
 
                 for (int i = 0; i < 4 * length; i += length)
-                { Assert.AreEqual(value, StringHelper.ReadString(m_buffer, i, value.Length)); }
+                { Assert.AreEqual(value, StringHelper.ReadUTF16(m_buffer, i, value.Length)); }
             }
 
             [TestCase("Test.")]
-            public void ASCIITest(string value)
+            public void ANSITest(string value)
             {
                 int length = value.Length;
 
                 for (int i = 0; i < 4 * length; i += length)
-                { StringHelper.WriteASCII(m_buffer, i, value); }
+                { StringHelper.WriteANSI(m_buffer, i, value); }
 
                 for (int i = 0; i < 4 * length; i += length)
-                { Assert.AreEqual(value, StringHelper.ReadASCII(m_buffer, i, value.Length)); }
+                { Assert.AreEqual(value, StringHelper.ReadANSI(m_buffer, i, value.Length)); }
             }
 
             [TestCase("手機瀏覽")]
@@ -59,18 +59,6 @@ namespace ByteStreamTest
                 for (int i = 0; i < 4 * length; i += length)
                 { Assert.AreEqual(value, StringHelper.ReadUTF8(m_buffer, i, length)); }
             }
-
-            [TestCase("手機瀏覽")]
-            public void UTF16Test(string value)
-            {
-                int length = Encoding.Unicode.GetByteCount(value);
-
-                for (int i = 0; i < 4 * length; i += length)
-                { StringHelper.WriteUTF16(m_buffer, i, value, length); }
-
-                for (int i = 0; i < 4 * length; i += length)
-                { Assert.AreEqual(value, StringHelper.ReadUTF16(m_buffer, i, length)); }
-            }
         }
         private class ByteArrTest
         {
@@ -82,27 +70,27 @@ namespace ByteStreamTest
             }
 
             [TestCase("手機瀏覽")]
-            public void StringTest(string value)
+            public void UTF16Test(string value)
             {
                 int length = value.Length * sizeof(char);
 
                 for (int i = 0; i < 4 * length; i += length)
-                { StringHelper.WriteString(m_buffer, i, value); }
+                { StringHelper.WriteUTF16(m_buffer, i, value); }
 
                 for (int i = 0; i < 4 * length; i += length)
-                { Assert.AreEqual(value, StringHelper.ReadString(m_buffer, i, value.Length)); }
+                { Assert.AreEqual(value, StringHelper.ReadUTF16(m_buffer, i, value.Length)); }
             }
 
             [TestCase("Test.")]
-            public void ASCIITest(string value)
+            public void ANSITest(string value)
             {
                 int length = value.Length;
 
                 for (int i = 0; i < 4 * length; i += length)
-                { StringHelper.WriteASCII(m_buffer, i, value); }
+                { StringHelper.WriteANSI(m_buffer, i, value); }
 
                 for (int i = 0; i < 4 * length; i += length)
-                { Assert.AreEqual(value, StringHelper.ReadASCII(m_buffer, i, value.Length)); }
+                { Assert.AreEqual(value, StringHelper.ReadANSI(m_buffer, i, value.Length)); }
             }
 
             [TestCase("手機瀏覽")]
@@ -115,18 +103,6 @@ namespace ByteStreamTest
 
                 for (int i = 0; i < 4 * length; i += length)
                 { Assert.AreEqual(value, StringHelper.ReadUTF8(m_buffer, i, length)); }
-            }
-
-            [TestCase("手機瀏覽")]
-            public void UTF16Test(string value)
-            {
-                int length = Encoding.Unicode.GetByteCount(value);
-
-                for (int i = 0; i < 4 * length; i += length)
-                { StringHelper.WriteUTF16(m_buffer, i, value); }
-
-                for (int i = 0; i < 4 * length; i += length)
-                { Assert.AreEqual(value, StringHelper.ReadUTF16(m_buffer, i, length)); }
             }
         }
     }

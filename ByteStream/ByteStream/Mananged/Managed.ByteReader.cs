@@ -6,18 +6,19 @@ using System.Text;
 
 namespace ByteStream.Mananged
 {
-    public class ByteReader : IReader
+    public struct ByteReader : IReader
     {
 #pragma warning disable IDE0032
-        protected byte[] m_buffer;
-        protected int m_offset;
+        private byte[] m_buffer;
+        private int m_offset;
+        private int m_length;
 #pragma warning restore IDE0032
 
         /// <summary>
         /// The length of this reader.
         /// </summary>
         public int Length
-            => m_buffer.Length;
+            => m_length;
         /// <summary>
         /// The current read offset.
         /// </summary>
@@ -26,17 +27,36 @@ namespace ByteStream.Mananged
         /// <summary>
         /// Determines if this reader has a fixed size.
         /// </summary>
-        public virtual bool IsFixedSize
+        public bool IsFixedSize
             => true;
 
         /// <summary>
         /// Creates a new instance of bytereader.
         /// </summary>
-        /// <param name="data">The data to be read by this bytereader.</param>
+        /// <param name="data">The data to read.</param>
         public ByteReader(byte[] data)
+            : this(data, 0, data.Length)
+        { }
+
+        /// <summary>
+        /// Creates a new instance of bytereader.
+        /// </summary>
+        /// <param name="data">The data to read.</param>
+        /// <param name="offset">The read offset.</param>
+        /// <param name="length">The total amount of bytes available for reading.</param>
+        public ByteReader(byte[] data, int offset, int length)
         {
             m_buffer = data ?? throw new ArgumentNullException("data");
-            m_offset = 0;
+
+            if (offset < 0)
+            { throw new ArgumentOutOfRangeException("offset"); }
+            if (length < 0)
+            { throw new ArgumentOutOfRangeException("count"); }
+            if (data.Length - offset < length)
+            { throw new ArgumentException("Array out of bounds."); }
+
+            m_offset = offset;
+            m_length = length;
         }
 
         /// <summary>
@@ -147,7 +167,7 @@ namespace ByteStream.Mananged
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal unsafe T ReadValueInternal<T>() where T : unmanaged
+        private unsafe T ReadValueInternal<T>() where T : unmanaged
         {
             int size = sizeof(T);
             EnsureCapacity(size);
@@ -158,9 +178,9 @@ namespace ByteStream.Mananged
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void EnsureCapacity(int bytesToRead)
+        private void EnsureCapacity(int bytesToRead)
         {
-            if (bytesToRead + m_offset > m_buffer.Length)
+            if (bytesToRead + m_offset > m_length)
             { throw new InvalidOperationException("Read operation exceeds buffer size!"); }
         }
     }

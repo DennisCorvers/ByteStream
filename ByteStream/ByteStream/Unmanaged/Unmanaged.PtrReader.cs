@@ -4,13 +4,12 @@ using System.Runtime.CompilerServices;
 
 namespace ByteStream.Unmanaged
 {
-    public class PtrReader : IReader
+    public struct PtrReader : IReader
     {
 #pragma warning disable IDE0032
+        private IntPtr m_buffer;
         private int m_length;
-
-        protected IntPtr m_buffer;
-        protected int m_offset;
+        private int m_offset;
 #pragma warning restore IDE0032
 
         /// <summary>
@@ -24,23 +23,40 @@ namespace ByteStream.Unmanaged
         public int Offset
             => m_offset;
         /// <summary>
-        /// Determines if this reader has a fixed size.
+        /// Gets the internal buffer used by this writer.
+        /// Do not modify the buffer while performing write operations.
         /// </summary>
-        public bool IsFixedSize
-            => true;
+        public IntPtr Buffer
+            => m_buffer;
 
         /// <summary>
-        /// Creates a new instance of bytereader.
+        /// Creates a new reader.
         /// </summary>
-        /// <param name="buffer">The data to be read by this bytereader.</param>
+        /// <param name="buffer">The data to be read by this reader.</param>
         /// <param name="bufferLength">The amount of bytes that can be read.</param>
-        public PtrReader(IntPtr buffer, int bufferLength)
-        {
-            if (buffer == IntPtr.Zero) { throw new ArgumentNullException("buffer"); }
-            if (bufferLength < 1) { throw new ArgumentOutOfRangeException("bufferLength"); }
+        public PtrReader(IntPtr buffer, int length)
+            : this(buffer, length, 0)
+        { }
 
-            m_offset = 0;
-            m_length = bufferLength;
+        /// <summary>
+        /// Creates a new reader.
+        /// </summary>
+        /// <param name="buffer">The data to be read by this reader.</param>
+        /// <param name="length">The amount of bytes that can be read.</param>
+        /// <param name="offset">The read offset.</param>
+        public PtrReader(IntPtr buffer, int length, int offset)
+        {
+            if (buffer == IntPtr.Zero) { throw new ArgumentNullException("data"); }
+
+            if (offset < 0)
+            { throw new ArgumentOutOfRangeException("offset"); }
+            if (length < 0)
+            { throw new ArgumentOutOfRangeException("count"); }
+            if (offset > length)
+            { throw new ArgumentException("Out of bounds."); }
+
+            m_offset = offset;
+            m_length = length;
             m_buffer = buffer;
         }
 
@@ -86,6 +102,7 @@ namespace ByteStream.Unmanaged
             m_offset += length;
             return val;
         }
+
         /// <summary>
         /// Reads a string as a double-byte character set. Each character requires 2 bytes.
         /// Does NOT automatically read length.

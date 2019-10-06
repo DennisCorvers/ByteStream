@@ -7,14 +7,14 @@ using System.Text;
 
 namespace ByteStream.Mananged
 {
-    public class ByteWriter : IWriter
+    public struct ByteWriter : IWriter
     {
         private const int DEFAULTSIZE = 64;
 
 #pragma warning disable IDE0032
-        protected byte[] m_buffer;
-        protected int m_offset;
-        protected bool m_isFixedSize;
+        private byte[] m_buffer;
+        private int m_offset;
+        private bool m_isFixedSize;
 #pragma warning restore IDE0032
 
         /// <summary>
@@ -40,37 +40,52 @@ namespace ByteStream.Mananged
             => m_buffer;
 
         /// <summary>
-        /// Creates a new instance of bytewriter with an empty buffer.
-        /// </summary>
-        public ByteWriter() : this(DEFAULTSIZE, true)
-        { }
-        /// <summary>
         /// Creates a new instance of bytewriter with an empty byffer.
         /// </summary>
         /// <param name="initialSize">The initial size of the buffer.</param>
         /// <param name="isFixedSize">Determines if the buffer is allowed to increase its size automatically.</param>
         public ByteWriter(int initialSize, bool isFixedSize)
         {
-            m_buffer = new byte[initialSize.NextPowerOfTwo()];
+            if (initialSize < 1) { throw new ArgumentException("initialSize"); }
+
+            m_buffer = new byte[initialSize];
             m_isFixedSize = isFixedSize;
             m_offset = 0;
         }
         /// <summary>
         /// Creates a new instance of bytewriter from an existing buffer.
         /// </summary>
-        /// <param name="buffer">The buffer to use with this writer.</param>
-        public ByteWriter(byte[] buffer) : this(buffer, true)
+        /// <param name="data">The buffer to use with this writer.</param>
+        public ByteWriter(byte[] data) : this(data, true)
         { }
         /// <summary>
         /// Creates a new instance of bytewriter from an existing buffer.
         /// </summary>
         /// <param name="buffer">The buffer to use with this writer.</param>
         /// <param name="isFixedSize">Determines if the buffer is allowed to increase its size automatically.</param>
-        public ByteWriter(byte[] buffer, bool isFixedSize)
+        public ByteWriter(byte[] data, bool isFixedSize)
         {
-            m_buffer = buffer ?? throw new ArgumentNullException("buffer");
+            m_buffer = data ?? throw new ArgumentNullException("buffer");
             m_isFixedSize = isFixedSize;
             m_offset = 0;
+        }
+
+        /// <summary>
+        /// Creates a new instance of bytewriter from an existing buffer.
+        /// </summary>
+        /// <param name="data">The byte array to wrap.</param>
+        /// <param name="offset">The write offset.</param>
+        public ByteWriter(byte[] data, int offset)
+        {
+            m_buffer = data ?? throw new ArgumentNullException("data");
+
+            if (offset < 0)
+            { throw new ArgumentOutOfRangeException("offset"); }
+            if (offset > data.Length)
+            { throw new ArgumentException("Offset is larger than array length."); }
+
+            m_isFixedSize = true;
+            m_offset = offset;
         }
 
         /// <summary>
@@ -85,20 +100,7 @@ namespace ByteStream.Mananged
             EnsureCapacity(amount);
             m_offset += amount;
         }
-        /// <summary>
-        /// Resizes the current buffer.
-        /// Performs an array copy.
-        /// </summary>
-        /// <param name="newSize">The new size of the buffer.</param>
-        public void Resize(int newSize)
-        {
-            if (newSize < 0)
-            { throw new ArgumentOutOfRangeException("newSize"); }
-            if (newSize < m_offset)
-            { throw new InvalidOperationException("New size is smaller than the current write offset!"); }
 
-            ArrayExtensions.ResizeUnsafe(ref m_buffer, newSize);
-        }
         /// <summary>
         /// Resizes the current buffer to the current write offset.
         /// Performs an array copy.
@@ -204,7 +206,7 @@ namespace ByteStream.Mananged
         /// Copies the inner buffer to a supplied buffer.
         /// </summary>
         /// <param name="buffer">The destination for the data.</param>
-        public void CopyToBytes(byte[] buffer)
+        public void CopyTo(byte[] buffer)
         {
             if (buffer == null)
             { throw new ArgumentNullException("buffer"); }
@@ -218,7 +220,7 @@ namespace ByteStream.Mananged
         /// Copies the inner buffer to a supplied buffer.
         /// </summary>
         /// <param name="buffer">The destination for the data.</param>
-        public void CopyToBytes(byte[] buffer, int destinationIndex)
+        public void CopyTo(byte[] buffer, int destinationIndex)
         {
             if (buffer == null)
             { throw new ArgumentNullException("buffer"); }
@@ -236,7 +238,7 @@ namespace ByteStream.Mananged
         /// </summary>
         /// <param name="buffer">The destination for the data.</param>
         /// <param name="length">The total length to copy (starting from 0)</param>
-        public void CopyToBytes(byte[] buffer, int destinationIndex, int length)
+        public void CopyTo(byte[] buffer, int destinationIndex, int length)
         {
             if (buffer == null)
             { throw new ArgumentNullException("buffer"); }
@@ -256,7 +258,7 @@ namespace ByteStream.Mananged
         /// Copies the inner buffer to a supplied buffer.
         /// </summary>
         /// <param name="buffer">The destination for the data.</param>
-        public void CopyToPtr(IntPtr ptr)
+        public void CopyTo(IntPtr ptr)
         {
             if (ptr == IntPtr.Zero)
             { throw new ArgumentNullException("buffer"); }
@@ -267,7 +269,7 @@ namespace ByteStream.Mananged
         /// Copies the inner buffer to a supplied buffer.
         /// </summary>
         /// <param name="buffer">The destination for the data.</param>
-        public void CopyToPtr(IntPtr ptr, int destinationIndex)
+        public void CopyTo(IntPtr ptr, int destinationIndex)
         {
             if (ptr == IntPtr.Zero)
             { throw new ArgumentNullException("buffer"); }
@@ -282,7 +284,7 @@ namespace ByteStream.Mananged
         /// </summary>
         /// <param name="buffer">The destination for the data.</param>
         /// <param name="length">The total length to copy (starting from 0)</param>
-        public void CopyToPtr(IntPtr ptr, int destinationIndex, int length)
+        public void CopyTo(IntPtr ptr, int destinationIndex, int length)
         {
             if (ptr == IntPtr.Zero)
             { throw new ArgumentNullException("buffer"); }
@@ -310,7 +312,7 @@ namespace ByteStream.Mananged
         {
             int newAmount = m_offset + bytesToAdd;
             if (newAmount > Length)
-            { Resize(newAmount); }
+            { ResizeInternal(newAmount); }
         }
         private void ResizeInternal(int resizeTo)
         {

@@ -7,19 +7,14 @@ using System.Text;
 
 namespace ByteStream.Unmanaged
 {
-    public class PtrWriter : IWriter
+    public struct PtrWriter : IWriter
     {
-        public delegate IntPtr ReAlloc(IntPtr ptr, int newSize);
-
         private const int DEFAULTSIZE = 64;
 
 #pragma warning disable IDE0032
+        private IntPtr m_buffer;
         private int m_length;
-        private ReAlloc m_realloc;
-
-        protected IntPtr m_buffer;
-        protected int m_offset;
-        protected bool m_isFixedSize;
+        private int m_offset;
 #pragma warning restore IDE0032
 
         /// <summary>
@@ -33,11 +28,6 @@ namespace ByteStream.Unmanaged
         public int Offset
             => m_offset;
         /// <summary>
-        /// Determines if this writer has a fixed size.
-        /// </summary>
-        public bool IsFixedSize
-            => m_isFixedSize;
-        /// <summary>
         /// Gets the internal buffer used by this writer.
         /// Do not modify the buffer while performing write operations.
         /// </summary>
@@ -45,38 +35,27 @@ namespace ByteStream.Unmanaged
             => m_buffer;
 
         /// <summary>
-        /// Creates a new instance of bytewriter from an existing buffer.
+        /// Creates a new writer.
         /// </summary>
         /// <param name="buffer">The buffer to use with this writer.</param>
         /// <param name="bufferLength">The amount of bytes that can be written.</param>
-        public PtrWriter(IntPtr buffer, int bufferLength)
-            : this(buffer, bufferLength, true)
+        public PtrWriter(IntPtr buffer, int length)
+            : this(buffer, 0, length)
         { }
         /// <summary>
-        /// Creates a new instance of bytewriter from an existing buffer.
+        /// Creates a new writer.
         /// </summary>
-        /// <param name="buffer">The buffer to use with this writer.</param>
-        /// <param name="bufferLength">The amount of bytes that can be written.</param>
-        /// <param name="isFixedSize">Determines if the buffer is allowed to increase its size automatically.</param>
-        public PtrWriter(IntPtr buffer, int bufferLength, bool isFixedSize)
-            : this(buffer, bufferLength, isFixedSize, Memory.ResizePtr)
-        { }
-        /// <summary>
-        /// Creates a new instance of bytewriter from an existing buffer.
-        /// </summary>
-        /// <param name="buffer">The buffer to use with this writer.</param>
-        /// <param name="bufferLength">The amount of bytes that can be written.</param>
-        /// <param name="isFixedSize">Determines if the buffer is allowed to increase its size automatically.</param>
-        /// <param name="reAllocCallback">A callback that is used for reallocating the buffer.</param>
-        public PtrWriter(IntPtr buffer, int bufferLength, bool isFixedSize, ReAlloc reAllocCallback)
+        /// <param name="buffer"></param>
+        /// <param name="offset"></param>
+        /// <param name="length"></param>
+        public PtrWriter(IntPtr buffer, int length, int offset)
         {
             if (buffer == IntPtr.Zero) { throw new ArgumentNullException("buffer"); }
+            if (offset > length) { throw new ArgumentException("Offset exceeds buffer length."); }
 
             m_buffer = buffer;
-            m_isFixedSize = isFixedSize;
-            m_offset = 0;
-            m_length = bufferLength;
-            m_realloc = reAllocCallback;
+            m_offset = offset;
+            m_length = length;
         }
 
         /// <summary>
@@ -92,35 +71,12 @@ namespace ByteStream.Unmanaged
             m_offset += amount;
         }
         /// <summary>
-        /// Resizes the current buffer.
-        /// Performs a memory copy.
-        /// </summary>
-        /// <param name="newSize">The new size of the buffer.</param>
-        public void Resize(int newSize)
-        {
-            if (newSize < 0)
-            { throw new ArgumentOutOfRangeException("newSize"); }
-            if (newSize < m_offset)
-            { throw new InvalidOperationException("New size is smaller than the current write offset!"); }
-
-            m_buffer = m_realloc(m_buffer, newSize);
-        }
-        /// <summary>
-        /// Resizes the current buffer to the current write offset.
-        /// Performs a memory copy.
-        /// </summary>
-        public void Trim()
-        {
-            m_buffer = m_realloc(m_buffer, m_offset);
-        }
-        /// <summary>
         /// Resets the offset to zero.
         /// </summary>
         public void Clear()
         {
             m_offset = 0;
         }
-
 
         /// <summary>
         /// Writes a byte array. Does NOT include the length.
@@ -211,20 +167,20 @@ namespace ByteStream.Unmanaged
         /// Copies the inner buffer to a supplied buffer.
         /// </summary>
         /// <param name="buffer">The destination for the data.</param>
-        public void CopyToBytes(byte[] buffer)
-        { CopyToBytes(buffer, 0, m_offset); }
+        public void CopyTo(byte[] buffer)
+        { CopyTo(buffer, 0, m_offset); }
         /// <summary>
         /// Copies the inner buffer to a supplied buffer.
         /// </summary>
         /// <param name="buffer">The destination for the data.</param>
-        public void CopyToBytes(byte[] buffer, int destinationIndex)
-        { CopyToBytes(buffer, destinationIndex, m_offset); }
+        public void CopyTo(byte[] buffer, int destinationIndex)
+        { CopyTo(buffer, destinationIndex, m_offset); }
         /// <summary>
         /// Copies the inner buffer to a supplied buffer.
         /// </summary>
         /// <param name="buffer">The destination for the data.</param>
         /// <param name="length">The total length to copy (starting from 0)</param>
-        public void CopyToBytes(byte[] buffer, int destinationIndex, int length)
+        public void CopyTo(byte[] buffer, int destinationIndex, int length)
         {
             if (buffer == null)
             { throw new ArgumentNullException("buffer"); }
@@ -244,20 +200,20 @@ namespace ByteStream.Unmanaged
         /// Copies the inner buffer to a supplied buffer.
         /// </summary>
         /// <param name="buffer">The destination for the data.</param>
-        public void CopyToPtr(IntPtr ptr)
-        { CopyToPtr(ptr, 0, m_offset); }
+        public void CopyTo(IntPtr ptr)
+        { CopyTo(ptr, 0, m_offset); }
         /// <summary>
         /// Copies the inner buffer to a supplied buffer.
         /// </summary>
         /// <param name="buffer">The destination for the data.</param>
-        public void CopyToPtr(IntPtr ptr, int destinationIndex)
-        { CopyToPtr(ptr, destinationIndex, m_offset); }
+        public void CopyTo(IntPtr ptr, int destinationIndex)
+        { CopyTo(ptr, destinationIndex, m_offset); }
         /// <summary>
         /// Copies the inner buffer to a supplied buffer.
         /// </summary>
         /// <param name="buffer">The destination for the data.</param>
         /// <param name="length">The total length to copy (starting from 0)</param>
-        public void CopyToPtr(IntPtr ptr, int destinationIndex, int length)
+        public void CopyTo(IntPtr ptr, int destinationIndex, int length)
         {
             if (ptr == IntPtr.Zero)
             { throw new ArgumentNullException("buffer"); }
@@ -283,19 +239,8 @@ namespace ByteStream.Unmanaged
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureCapacity(int bytesToAdd)
         {
-            int newAmount = m_offset + bytesToAdd;
-            if (newAmount > Length)
-            { Resize(newAmount); }
-        }
-        private void ResizeInternal(int resizeTo)
-        {
-            if (m_isFixedSize)
-            { throw new InvalidOperationException("Buffer is set to a fixed size and cannot resize automatically!"); }
-
-            int nextpwr = Length.NextPowerOfTwo();
-            int newSize = Length == nextpwr ? Length * 2 : nextpwr;
-
-            m_buffer = m_realloc(m_buffer, newSize);
+            if(m_length < m_offset + bytesToAdd)
+            { throw new InvalidOperationException("Unable to write more data."); }
         }
     }
 }

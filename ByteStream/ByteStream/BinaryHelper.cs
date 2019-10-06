@@ -32,15 +32,6 @@ namespace ByteStream
             { Buffer.MemoryCopy(src, (void*)(dest + offset), value.Length, value.Length); }
         }
 
-        public static void WritePointer(byte[] dest, int offset, IntPtr value, int length)
-        {
-            Memory.CopyMemory(value, 0, dest, offset, length);
-        }
-        public static void WritePointer(IntPtr dest, int offset, IntPtr value, int length)
-        {
-            Memory.CopyMemory(value, 0, dest, offset, length);
-        }
-
         /// <summary>
         /// Clears a given number of bytes.
         /// </summary>
@@ -123,19 +114,6 @@ namespace ByteStream
 
             bin.CopyToUnsafe(offset, result, 0, length);
             return result;
-        }
-
-        public static IntPtr ReadPointer(IntPtr data, int offset, int length)
-        {
-            IntPtr val = Marshal.AllocHGlobal(length);
-            Memory.CopyMemory(data, offset, val, 0, length);
-            return val;
-        }
-        public static IntPtr ReadPointer(byte[] bin, int offset, int length)
-        {
-            IntPtr val = Marshal.AllocHGlobal(length);
-            Memory.CopyMemory(bin, offset, val, 0, length);
-            return val;
         }
 
         /// <summary>

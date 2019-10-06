@@ -8,7 +8,6 @@ namespace ByteStream.Interfaces
     {
         int Length { get; }
         int Offset { get; }
-        bool IsFixedSize { get; }
 
         void SkipBytes(int amount);
         void Clear();

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace ByteStream.Mananged
 {
-    public struct ByteWriter : IWriter
+    public struct ByteWriter : IWriter<ByteWriter>
     {
         private const int DEFAULTSIZE = 64;
 
@@ -121,85 +121,67 @@ namespace ByteStream.Mananged
         /// Writes a blittable struct or primitive value to the buffer.
         /// </summary>
         /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
-        public void Write<T>(T value) where T : unmanaged
+        public ByteWriter Write<T>(T value) where T : unmanaged
+        {
+            WriteValueInternal(value); return this;
+        }
+
+        public void Write<T>(T value, bool f) where T : unmanaged
         {
             WriteValueInternal(value);
         }
 
         /// <summary>
-        /// Writes a byte array. Does NOT include the length.
+        /// Writes a byte array.
         /// </summary>
-        /// <param name="value"></param>
-        public void WriteBytes(byte[] value)
+        /// <param name="includeSize">TRUE to include the size as an uint16</param>
+        public void WriteBytes(byte[] value, bool includeSize = false)
         {
+            if (includeSize)
+            {
+                if (value.Length > ushort.MaxValue)
+                { throw new ArgumentOutOfRangeException("value", "Maximum size of 65535 exceeded."); }
+                Write((ushort)value.Length);
+            }
+
             EnsureCapacity(value.Length);
             BinaryHelper.WriteBytes(m_buffer, m_offset, value);
             m_offset += value.Length;
         }
         /// <summary>
-        /// Writes a byte array. Includes the length as uint16.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteBytesLength(byte[] value)
-        {
-            Write((ushort)value.Length);
-            WriteBytes(value);
-        }
-
-        /// <summary>
         /// Writes a string as a double-byte character set. Each character requires 2 bytes.
-        /// Does NOT include the length.
         /// </summary>
-        /// <param name="value"></param>
-        public void WriteUTF16(string value)
+        /// <param name="includeSize">TRUE to include the size as an uint16</param>
+        public void WriteUTF16(string value, bool includeSize = false)
         {
+            if (includeSize)
+            {
+                if (value.Length > ushort.MaxValue)
+                { throw new ArgumentOutOfRangeException("value", "Maximum size of 65535 exceeded."); }
+                Write((ushort)value.Length);
+            }
+
             EnsureCapacity(value.Length * sizeof(char));
             StringHelper.WriteUTF16(m_buffer, m_offset, value);
             m_offset += value.Length * sizeof(char);
-        }
-        /// <summary>
-        /// Writes a string as a double-byte character set. Includes the length of the string as an uint16.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteUTF16Length(string value)
-        {
-            Write((ushort)value.Length);
-            WriteUTF16(value);
         }
         /// <summary>
         /// Writes a string in ANSI encoding. Each character requires 1 byte.
         /// Does NOT include the length.
         /// </summary>
         /// <param name="value"></param>
-        public void WriteANSI(string value)
+        public void WriteANSI(string value, bool includeSize = false)
         {
+            if (includeSize)
+            {
+                if (value.Length > ushort.MaxValue)
+                { throw new ArgumentOutOfRangeException("value", "Maximum size of 65535 exceeded."); }
+                Write((ushort)value.Length);
+            }
+
             EnsureCapacity(value.Length);
             StringHelper.WriteANSI(m_buffer, m_offset, value);
             m_offset += value.Length;
-        }
-        /// <summary>
-        /// Writes a string in ANSI encoding. Includes the length of the string as an uint16.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteANSILength(string value)
-        {
-            Write((ushort)value.Length);
-            WriteANSI(value);
-        }
-        /// <summary>
-        /// Writes a string in UTF8 encoding. Includes the length of the string as an uint16.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteUTF8(string value)
-        {
-            int byteSize = Encoding.UTF8.GetByteCount(value);
-
-            EnsureCapacity(byteSize + sizeof(ushort));
-            BinaryHelper.Write(m_buffer, m_offset, (ushort)value.Length);
-            m_offset += sizeof(ushort);
-
-            StringHelper.WriteUTF8(m_buffer, m_offset, value);
-            m_offset += byteSize;
         }
 
         /// <summary>
@@ -254,49 +236,6 @@ namespace ByteStream.Mananged
 
             m_buffer.CopyToUnsafe(0, buffer, destinationIndex, length);
         }
-        /// <summary>
-        /// Copies the inner buffer to a supplied buffer.
-        /// </summary>
-        /// <param name="buffer">The destination for the data.</param>
-        public void CopyTo(IntPtr ptr)
-        {
-            if (ptr == IntPtr.Zero)
-            { throw new ArgumentNullException("buffer"); }
-
-            Memory.CopyMemory(m_buffer, m_offset, ptr, 0, m_offset);
-        }
-        /// <summary>
-        /// Copies the inner buffer to a supplied buffer.
-        /// </summary>
-        /// <param name="buffer">The destination for the data.</param>
-        public void CopyTo(IntPtr ptr, int destinationIndex)
-        {
-            if (ptr == IntPtr.Zero)
-            { throw new ArgumentNullException("buffer"); }
-
-            if (destinationIndex < 0)
-            { throw new ArgumentOutOfRangeException("destinationIndex"); }
-
-            Memory.CopyMemory(m_buffer, m_offset, ptr, destinationIndex, m_offset);
-        }
-        /// <summary>
-        /// Copies the inner buffer to a supplied buffer.
-        /// </summary>
-        /// <param name="buffer">The destination for the data.</param>
-        /// <param name="length">The total length to copy (starting from 0)</param>
-        public void CopyTo(IntPtr ptr, int destinationIndex, int length)
-        {
-            if (ptr == IntPtr.Zero)
-            { throw new ArgumentNullException("buffer"); }
-
-            if (destinationIndex < 0)
-            { throw new ArgumentOutOfRangeException("destinationIndex"); }
-
-            if (length < 1 || length > Length)
-            { throw new ArgumentOutOfRangeException("length"); }
-
-            Memory.CopyMemory(m_buffer, m_offset, ptr, destinationIndex, length);
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private unsafe void WriteValueInternal<T>(T value) where T : unmanaged
@@ -319,10 +258,7 @@ namespace ByteStream.Mananged
             if (m_isFixedSize)
             { throw new InvalidOperationException("Buffer is set to a fixed size and cannot resize automatically."); }
 
-            int nextpwr = Length.NextPowerOfTwo();
-            int newSize = Length == nextpwr ? Length * 2 : nextpwr;
-
-            ArrayExtensions.ResizeUnsafe(ref m_buffer, newSize);
+            ArrayExtensions.ResizeUnsafe(ref m_buffer, resizeTo.NextPowerOfTwo());
         }
     }
 }

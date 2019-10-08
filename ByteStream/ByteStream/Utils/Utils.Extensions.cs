@@ -20,5 +20,6 @@ namespace ByteStream.Utils
             num++;
             return num;
         }
+
     }
 }

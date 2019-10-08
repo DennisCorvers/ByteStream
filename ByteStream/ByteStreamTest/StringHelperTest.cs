@@ -47,18 +47,6 @@ namespace ByteStreamTest
                 for (int i = 0; i < 4 * length; i += length)
                 { Assert.AreEqual(value, StringHelper.ReadANSI(m_buffer, i, value.Length)); }
             }
-
-            [TestCase("手機瀏覽")]
-            public void UTF8Test(string value)
-            {
-                int length = Encoding.UTF8.GetByteCount(value);
-
-                for (int i = 0; i < 4 * length; i += length)
-                { StringHelper.WriteUTF8(m_buffer, i, value, length); }
-
-                for (int i = 0; i < 4 * length; i += length)
-                { Assert.AreEqual(value, StringHelper.ReadUTF8(m_buffer, i, length)); }
-            }
         }
         private class ByteArrTest
         {
@@ -91,18 +79,6 @@ namespace ByteStreamTest
 
                 for (int i = 0; i < 4 * length; i += length)
                 { Assert.AreEqual(value, StringHelper.ReadANSI(m_buffer, i, value.Length)); }
-            }
-
-            [TestCase("手機瀏覽")]
-            public void UTF8Test(string value)
-            {
-                int length = Encoding.UTF8.GetByteCount(value);
-
-                for (int i = 0; i < 4 * length; i += length)
-                { StringHelper.WriteUTF8(m_buffer, i, value); }
-
-                for (int i = 0; i < 4 * length; i += length)
-                { Assert.AreEqual(value, StringHelper.ReadUTF8(m_buffer, i, length)); }
             }
         }
     }

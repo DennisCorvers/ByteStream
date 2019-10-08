@@ -35,8 +35,12 @@ namespace ByteStream.Mananged
         /// </summary>
         /// <param name="data">The data to read.</param>
         public ByteReader(byte[] data)
-            : this(data, 0, data.Length)
-        { }
+        {
+            m_buffer = data ?? throw new ArgumentNullException("data");
+
+            m_offset = 0;
+            m_length = data.Length;
+        }
 
         /// <summary>
         /// Creates a new instance of bytereader.
@@ -72,7 +76,7 @@ namespace ByteStream.Mananged
             m_offset += amount;
         }
         /// <summary>
-        /// Resets the offset to zero.
+        /// Resets the offset to its original position.
         /// </summary>
         public void Clear()
         {
@@ -116,8 +120,8 @@ namespace ByteStream.Mananged
         /// </summary>
         public string ReadUTF16()
         {
-            ushort lengh = Read<ushort>();
-            return ReadUTF16(Length);
+            ushort length = Read<ushort>();
+            return ReadUTF16(length);
         }
         /// <summary>
         /// Reads a string as a double-byte character set. Each character requires 2 bytes.
@@ -150,19 +154,6 @@ namespace ByteStream.Mananged
             string val = StringHelper.ReadANSI(m_buffer, m_offset, stringLength);
 
             m_offset += stringLength;
-            return val;
-        }
-
-        /// <summary>
-        /// Reads a string in UTF8 encoding. Length is automatically retrieved as an uint16.
-        /// </summary>
-        public string ReadUTF8()
-        {
-            ushort length = Read<ushort>();
-            EnsureCapacity(length);
-            string val = StringHelper.ReadUTF8(m_buffer, m_offset, length);
-
-            m_offset += length;
             return val;
         }
 

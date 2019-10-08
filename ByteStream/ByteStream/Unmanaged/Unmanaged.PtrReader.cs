@@ -143,19 +143,7 @@ namespace ByteStream.Unmanaged
             ushort length = Read<ushort>();
             return ReadANSI(length);
         }
-        /// <summary>
-        /// Reads a string in UTF8 encoding. Length is automatically retrieved as an uint16.
-        /// </summary>
-        public string ReadUTF8()
-        {
-            ushort length = Read<ushort>();
-            EnsureCapacity(length);
-            string val = StringHelper.ReadUTF8(m_buffer, m_offset, length);
 
-            m_offset += length;
-            return val;
-
-        }
         /// <summary>
         /// Reads a string in UTF16 encoding. Length is automatically retrieved as an uint16.
         /// </summary>

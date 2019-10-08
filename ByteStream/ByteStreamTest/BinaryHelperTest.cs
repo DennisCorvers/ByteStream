@@ -42,6 +42,8 @@ namespace ByteStreamTest
             [Test]
             public void BytesTest()
             {
+                Assert.Catch(() => { BinaryHelper.WriteBytes(m_buffer, 0, null); });
+
                 byte[] value = new byte[4] { 1, 2, 3, 5 };
                 int length = 4;
 
@@ -50,6 +52,8 @@ namespace ByteStreamTest
 
                 for (int i = 0; i < 4 * length; i += length)
                 { Assert.AreEqual(value, BinaryHelper.ReadBytes(m_buffer, i, 4)); }
+
+                Assert.AreEqual(0, BinaryHelper.ReadBytes(m_buffer, 0, 0).Length);
             }
 
             [Test]
@@ -66,6 +70,17 @@ namespace ByteStreamTest
                     var other = BinaryHelper.Read<BlittableStruct>(m_buffer, i);
                     Assert.True(other.IsEqual(dat));
                 }
+            }
+
+            [Test]
+            public void ClearBytes()
+            {
+                Assert.Catch(() => { BinaryHelper.ClearBytes(m_buffer, 0, 0); });
+                Assert.Catch(() => { BinaryHelper.ClearBytes(m_buffer, 0, 1025); });
+
+                BinaryHelper.Write<byte>(m_buffer, 0, 1);
+                BinaryHelper.ClearBytes(m_buffer, 0, 4);
+                Assert.AreEqual(0, BinaryHelper.Read<byte>(m_buffer, 0));
             }
         }
         private class ByteArrTest
@@ -94,6 +109,8 @@ namespace ByteStreamTest
 
                 for (int i = 0; i < 4 * length; i += length)
                 { Assert.AreEqual(value, BinaryHelper.ReadBytes(m_buffer, i, 4)); }
+
+                Assert.AreEqual(0, BinaryHelper.ReadBytes(m_buffer, 0, 0).Length);
             }
 
             [TestCase(108971523)]
@@ -122,6 +139,16 @@ namespace ByteStreamTest
                     var other = BinaryHelper.Read<BlittableStruct>(m_buffer, i);
                     Assert.True(other.IsEqual(dat));
                 }
+            }
+
+            [Test]
+            public void ClearBytes()
+            {
+                byte[] buf = new byte[4] { 1, 1, 1, 1 };
+                Assert.Catch(() => { BinaryHelper.ClearBytes(buf, 0, 0); });
+
+                BinaryHelper.ClearBytes(buf, 1, 2);
+                Assert.AreEqual(new byte[] { 1, 0, 0, 1 }, buf);
             }
         }
     }

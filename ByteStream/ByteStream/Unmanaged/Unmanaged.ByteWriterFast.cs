@@ -8,7 +8,7 @@ using System.Text;
 
 namespace ByteStream.Unmanaged
 {
-    public struct ByteWriterFast : IWriter, IDisposable
+    public struct ByteWriterFast : IWriter<ByteWriterFast>, IDisposable
     {
         private const int DEFAULTSIZE = 64;
 
@@ -67,11 +67,20 @@ namespace ByteStream.Unmanaged
             m_length = length;
         }
 
+        /// <summary>
+        /// Pins the underlaying buffer.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Pin()
         {
             if (!IsPinned)
-            { GCHandle.Alloc(m_buffer, GCHandleType.Pinned); }
+            { m_pinnedArray = GCHandle.Alloc(m_buffer, GCHandleType.Pinned); }
         }
+
+        /// <summary>
+        /// Frees the underlaying buffer.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UnPin()
         {
             if (IsPinned)
@@ -102,9 +111,9 @@ namespace ByteStream.Unmanaged
         /// Writes a blittable struct or primitive value to the buffer.
         /// </summary>
         /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
-        public void Write<T>(T value) where T : unmanaged
+        public ByteWriterFast Write<T>(T value) where T : unmanaged
         {
-            WriteValueInternal(value);
+            WriteValueInternal(value); return this;
         }
 
         /// <summary>
@@ -166,21 +175,6 @@ namespace ByteStream.Unmanaged
         {
             Write((ushort)value.Length);
             WriteANSI(value);
-        }
-        /// <summary>
-        /// Writes a string in UTF8 encoding. Includes the length of the string as an uint16.
-        /// </summary>
-        /// <param name="value"></param>
-        public void WriteUTF8(string value)
-        {
-            int byteSize = Encoding.UTF8.GetByteCount(value);
-
-            EnsureCapacity(byteSize + sizeof(ushort));
-            BinaryHelper.Write(m_ptr, m_offset, (ushort)value.Length);
-            m_offset += sizeof(ushort);
-
-            StringHelper.WriteUTF8(m_ptr, m_offset, value, byteSize);
-            m_offset += byteSize;
         }
 
         /// <summary>

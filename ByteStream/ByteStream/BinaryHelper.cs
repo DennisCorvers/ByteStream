@@ -41,6 +41,7 @@ namespace ByteStream
         public static void ClearBytes(byte[] dest, int offset, int bytesToSkip)
         {
             if (bytesToSkip < 1) { throw new ArgumentOutOfRangeException("bytesToSkip", "Must be at least 1."); }
+
             for (int i = 0; i < bytesToSkip; i++)
             { dest[i + offset] = 0; }
         }

@@ -126,11 +126,6 @@ namespace ByteStream.Mananged
             WriteValueInternal(value); return this;
         }
 
-        public void Write<T>(T value, bool f) where T : unmanaged
-        {
-            WriteValueInternal(value);
-        }
-
         /// <summary>
         /// Writes a byte array.
         /// </summary>

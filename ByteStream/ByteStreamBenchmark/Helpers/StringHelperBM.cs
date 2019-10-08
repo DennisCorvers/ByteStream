@@ -13,7 +13,7 @@ namespace ByteStreamBenchmark.Helpers
     {
         private readonly byte[] m_buf;
         private readonly ByteWriter bw;
-        private readonly ByteWriterFast bwf;
+        private  ByteWriterFast bwf;
         private readonly PtrWriter pw;
 
         public StringHelperBM()
@@ -21,10 +21,16 @@ namespace ByteStreamBenchmark.Helpers
             m_buf = new byte[64];
             bw = new ByteWriter(m_buf);
             pw = new PtrWriter(Marshal.AllocHGlobal(64), 64);
-            bwf = new ByteWriterFast(m_buf);
+            bwf = new ByteWriterFast(new byte[64]);
         }
 
-        [Benchmark]
+        [IterationSetup]
+        public void Test()
+        {
+            bwf = new ByteWriterFast(new byte[64]);
+        }
+
+        //[Benchmark]
         public void PinAlways()
         {
             for (int i = 0; i < 16; i++)
@@ -42,9 +48,11 @@ namespace ByteStreamBenchmark.Helpers
                 bwf.Write(i);
             }
             bwf.UnPin();
+            bwf.Dispose();
+
         }
 
-        [Benchmark]
+        //[Benchmark]
         public void intptr()
         {
             for (int i = 0; i < 16; i++)
@@ -52,5 +60,6 @@ namespace ByteStreamBenchmark.Helpers
                 pw.Write(i);
             }
         }
+
     }
 }

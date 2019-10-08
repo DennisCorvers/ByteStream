@@ -81,7 +81,7 @@ namespace ByteStream
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Write<T>(IntPtr dest, int offset, T value) where T : unmanaged
         {
-            *((T*)dest + offset) = value;
+            *(T*)(dest + offset) = value;
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace ByteStream
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Read<T>(IntPtr data, int offset) where T : unmanaged
         {
-            return *((T*)data + offset);
+            return *(T*)(data + offset);
         }
     }
 }

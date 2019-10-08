@@ -12,13 +12,20 @@ namespace ByteStreamTest.Unmanaged
         [Test]
         public void CtorTest()
         {
-            byte[] buf = new byte[16];
+            byte[] buf = new byte[1024];
             ByteWriterFast bwf = new ByteWriterFast(buf);
+            int size = System.Runtime.InteropServices.Marshal.SizeOf<ByteWriterFast>();
+
+            for (int i = 0; i < 64; i++)
+            {
+
+            }
             bwf.Pin();
             bwf.Write(123);
             bwf.UnPin();
-
-            
+            bwf.Pin();
+            bwf.Write(123);
+            bwf.UnPin();
         }
     }
 }

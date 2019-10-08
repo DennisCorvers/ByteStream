@@ -16,4 +16,8 @@
     <ProjectReference Include="..\ByteStream\ByteStream.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Unmanaged\Pointer\" />
+  </ItemGroup>
+
 </Project>

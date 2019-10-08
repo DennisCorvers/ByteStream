@@ -317,7 +317,7 @@ namespace ByteStream.Mananged
         private void ResizeInternal(int resizeTo)
         {
             if (m_isFixedSize)
-            { throw new InvalidOperationException("Buffer is set to a fixed size and cannot resize automatically!"); }
+            { throw new InvalidOperationException("Buffer is set to a fixed size and cannot resize automatically."); }
 
             int nextpwr = Length.NextPowerOfTwo();
             int newSize = Length == nextpwr ? Length * 2 : nextpwr;

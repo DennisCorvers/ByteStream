@@ -181,7 +181,7 @@ namespace ByteStream.Mananged
         private void EnsureCapacity(int bytesToRead)
         {
             if (bytesToRead + m_offset > m_length)
-            { throw new InvalidOperationException("Read operation exceeds buffer size!"); }
+            { throw new InvalidOperationException("Read operation exceeds buffer size."); }
         }
     }
 }

@@ -158,12 +158,30 @@ namespace ByteStream.Unmanaged
         }
 
         /// <summary>
-        /// Reades a blittable struct or primitive value from the buffer.
+        /// Reads a blittable struct or primitive value from the buffer.
         /// </summary>
         /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
         public T Read<T>() where T : unmanaged
         {
             return ReadValueInternal<T>();
+        }
+        /// <summary>
+        /// Tries to read a blittable struct or primitive value from the buffer.
+        /// </summary>
+        /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
+        /// <returns>Returns false if the value couldn't be read.</returns>
+        public bool TryRead<T>(out T value) where T : unmanaged
+        {
+            value = default;
+
+            unsafe
+            {
+                int size = sizeof(T);
+                if (m_offset + size > m_length) { return false; }
+                value = BinaryHelper.Read<T>(m_buffer, m_offset);
+                m_offset += size;
+            }
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

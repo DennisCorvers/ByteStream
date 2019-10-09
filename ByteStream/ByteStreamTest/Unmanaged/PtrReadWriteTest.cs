@@ -12,12 +12,14 @@ namespace ByteStreamTest.Unmanaged
     [TestFixture]
     public class PtrReadWriteTest
     {
+        //Do not change this value.
+        private const int BUFSIZE = 64;
         private IntPtr m_buffer;
 
         [SetUp]
         public void Init()
         {
-            m_buffer = Marshal.AllocHGlobal(64);
+            m_buffer = Marshal.AllocHGlobal(BUFSIZE);
         }
         [TearDown]
         public void TearDown()
@@ -38,6 +40,26 @@ namespace ByteStreamTest.Unmanaged
 
             Assert.AreEqual(16, pw.Offset);
             Assert.AreEqual(pr.Offset, pw.Offset);
+        }
+
+        [Test]
+        public void TryWrite()
+        {
+            var bw = new PtrWriter(m_buffer, 64);
+            Assert.AreEqual(true, bw.TryWrite(123));
+
+            bw.SkipBytes(60);
+            Assert.AreEqual(false, bw.TryWrite(123));
+        }
+
+        [Test]
+        public void TryRead()
+        {
+            var br = new PtrReader(m_buffer, 64);
+            Assert.AreEqual(true, br.TryRead(out int value));
+
+            br.SkipBytes(60);
+            Assert.AreEqual(false, br.TryRead(out int valu2));
         }
 
         [Test]

@@ -90,6 +90,22 @@ namespace ByteStream.Unmanaged
         {
             WriteValueInternal(value);
         }
+        /// <summary>
+        /// Tries to write a blittable struct or primitive value to the buffer.
+        /// </summary>
+        /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
+        /// <returns>Returns false if the value couldn't be written.</returns>
+        public bool TryWrite<T>(T value) where T : unmanaged
+        {
+            unsafe
+            {
+                int size = sizeof(T);
+                if (m_offset + size > m_length) { return false; }
+                BinaryHelper.Write(m_buffer, m_offset, value);
+                m_offset += size;
+            }
+            return true;
+        }
 
         /// <summary>
         /// Writes a byte array.

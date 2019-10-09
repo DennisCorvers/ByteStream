@@ -11,12 +11,15 @@ namespace ByteStreamTest.Managed
     [TestFixture]
     public class ByteReadWriteTest
     {
+        //Do not change this value!
+        private const int BUFSIZE = 32;
+
         private byte[] m_buffer;
 
         [SetUp]
         public void Init()
         {
-            m_buffer = new byte[32];
+            m_buffer = new byte[BUFSIZE];
         }
 
         [TestCase(123, 1.2f, 1.3d)]
@@ -32,6 +35,26 @@ namespace ByteStreamTest.Managed
 
             Assert.AreEqual(16, bw.Offset);
             Assert.AreEqual(br.Offset, bw.Offset);
+        }
+
+        [Test]
+        public void TryWrite()
+        {
+            var bw = new ByteWriter(m_buffer);
+            Assert.AreEqual(true, bw.TryWrite(123));
+
+            bw.SkipBytes(28);
+            Assert.AreEqual(false, bw.TryWrite(123));
+        }
+
+        [Test]
+        public void TryRead()
+        {
+            var br = new ByteReader(m_buffer);
+            Assert.AreEqual(true, br.TryRead(out int value));
+
+            br.SkipBytes(28);
+            Assert.AreEqual(false, br.TryRead(out int valu2));
         }
 
         [Test]

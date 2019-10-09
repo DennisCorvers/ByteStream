@@ -5,7 +5,7 @@ A blazing fast byte (de)serializer
 Bytestream is a small library that enables blazing fast serialization of a collection of types to raw bytes. Either in the form of a byte array `byte[]` or unmanaged memory `IntPtr`.
 The library performs no memory allocation on its own, so you are free to use your own memory allocator!
 
-*See the Usage section for a brief introduction on how to use the library.*
+*__Carefully read the Usage section__ for a brief introduction on how to use the library.*
 
 ## What does ByteStream offer?
 Bytestream offers 2 sets of serializers and deserializers, called writers and readers. They are solely used for manual serialization and deserialization of the supported types.
@@ -108,5 +108,24 @@ int intValue = reader.Read<int>();
 
 ### Defining custom types
 
-Because the Write and Read function is publically available, we can easily define our own serialization of types.
+We can create extension methods to allow serializing and deserializing of user-defined types (even classes!).
+__Be sure to add the `ref` keyword to ensure the offset gets incremented!__
 
+```C#
+public static void WritePoint(ref this ByteWriter writer, Point point)
+{
+    writer.Write(point.X); writer.Write(point.Y);
+}
+
+public static Point ReadPoint(ref this ByteReader reader)
+{
+    return new Point(reader.Read<int>(), reader.Read<int>());
+}
+
+//We can then use these extension methods from anywhere else
+ByteWriter writer = new ByteWriter(buffer);
+writer.WritePoint(new Point(1, 2));
+
+ByteReader reader = new ByteReader(buffer);
+var point = reader.ReadPoint();
+```

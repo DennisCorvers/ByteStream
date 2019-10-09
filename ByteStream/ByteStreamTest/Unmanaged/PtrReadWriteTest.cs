@@ -1,5 +1,6 @@
 ﻿using ByteStream;
 using ByteStream.Mananged;
+using ByteStream.Unmanaged;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -11,77 +12,82 @@ namespace ByteStreamTest.Unmanaged
     [TestFixture]
     public class PtrReadWriteTest
     {
-        private byte[] m_buffer;
+        private IntPtr m_buffer;
 
         [SetUp]
         public void Init()
         {
-            m_buffer = new byte[32];
+            m_buffer = Marshal.AllocHGlobal(64);
+        }
+        [TearDown]
+        public void TearDown()
+        {
+            Marshal.FreeHGlobal(m_buffer);
         }
 
         [TestCase(123, 1.2f, 1.3d)]
         public void ValueTest(int iVal, float fVal, double dVal)
         {
-            var bw = new ByteWriter(m_buffer);
-            bw.Write(iVal); bw.Write(fVal); bw.Write(dVal);
+            var pw = new PtrWriter(m_buffer, 64);
+            pw.Write(iVal); pw.Write(fVal); pw.Write(dVal);
 
-            var br = new ByteReader(m_buffer);
-            Assert.AreEqual(iVal, br.Read<int>());
-            Assert.AreEqual(fVal, br.Read<float>());
-            Assert.AreEqual(dVal, br.Read<double>());
+            var pr = new PtrReader(m_buffer, 64);
+            Assert.AreEqual(iVal, pr.Read<int>());
+            Assert.AreEqual(fVal, pr.Read<float>());
+            Assert.AreEqual(dVal, pr.Read<double>());
 
-            Assert.AreEqual(16, bw.Offset);
-            Assert.AreEqual(br.Offset, bw.Offset);
+            Assert.AreEqual(16, pw.Offset);
+            Assert.AreEqual(pr.Offset, pw.Offset);
         }
 
         [Test]
         public void BytesTest()
         {
             byte[] val = new byte[4] { 1, 2, 3, 4 };
-            var bw = new ByteWriter(m_buffer);
-            bw.WriteBytes(val);
+            var pw = new PtrWriter(m_buffer, 64);
+            pw.WriteBytes(val);
 
-            var br = new ByteReader(m_buffer);
-            var returnVal = br.ReadBytes(4);
+            var pr = new PtrReader(m_buffer, 64);
+            var returnVal = pr.ReadBytes(4);
 
             Assert.AreEqual(val, returnVal);
-            Assert.AreEqual(4, br.Offset);
-            Assert.AreEqual(bw.Offset, br.Offset);
+            Assert.AreEqual(4, pr.Offset);
+            Assert.AreEqual(pw.Offset, pr.Offset);
         }
 
         [TestCase("手機瀏覽")]
         public void UTF16Test(string value)
         {
-            var bw = new ByteWriter(m_buffer);
-            bw.WriteUTF16(value, true);
+            var pw = new PtrWriter(m_buffer, 64);
+            pw.WriteUTF16(value, true);
 
-            var br = new ByteReader(m_buffer);
-            Assert.AreEqual(value, br.ReadUTF16());
-            Assert.AreEqual(br.Offset, bw.Offset);
+            var pr = new PtrReader(m_buffer, 64);
+            Assert.AreEqual(value, pr.ReadUTF16());
+            Assert.AreEqual(pr.Offset, pw.Offset);
         }
 
         [TestCase("手機瀏覽")]
         public void UTF16TestLen(string value)
         {
-            var bw = new ByteWriter(m_buffer);
-            bw.WriteUTF16(value);
+            var pw = new PtrWriter(m_buffer, 64);
+            pw.WriteUTF16(value);
 
-            var br = new ByteReader(m_buffer);
-            Assert.AreEqual(value, br.ReadUTF16(value.Length));
-            Assert.AreEqual(br.Offset, bw.Offset);
-            Assert.AreEqual(value.Length * sizeof(char), bw.Offset);
+            var pr = new PtrReader(m_buffer, 64);
+            Assert.AreEqual(value, pr.ReadUTF16(value.Length));
+            Assert.AreEqual(pr.Offset, pw.Offset);
+            Assert.AreEqual(value.Length * sizeof(char), pw.Offset);
         }
 
         [TestCase("Test.")]
         public void ANSITestLen(string value)
         {
-            var bw = new ByteWriter(m_buffer);
-            bw.WriteANSI(value);
+            var pw = new PtrWriter(m_buffer, 64);
+            pw.WriteANSI(value);
 
-            var br = new ByteReader(m_buffer);
-            Assert.AreEqual(value, br.ReadANSI(value.Length));
-            Assert.AreEqual(br.Offset, bw.Offset);
-            Assert.AreEqual(value.Length, bw.Offset);
+            var pr = new PtrReader(m_buffer, 64);
+            Assert.AreEqual(value, pr.ReadANSI(value.Length));
+            Assert.AreEqual(pr.Offset, pw.Offset);
+            Assert.AreEqual(value.Length, pw.Offset);
         }
     }
 }

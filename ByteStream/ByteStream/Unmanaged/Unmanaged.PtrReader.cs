@@ -153,7 +153,7 @@ namespace ByteStream.Unmanaged
             EnsureCapacity(length);
             string val = StringHelper.ReadUTF16(m_buffer, m_offset, length);
 
-            m_offset += length;
+            m_offset += length * sizeof(char);
             return val;
         }
 

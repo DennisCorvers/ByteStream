@@ -60,7 +60,7 @@ namespace ByteStreamTest.Unmanaged
         [Test]
         public void ClearTest()
         {
-            var pw = new PtrWriter(m_buffer, 64, 5);
+            var pw = new PtrWriter(m_buffer, 5, 64);
             pw.Clear();
             Assert.AreEqual(0, pw.Offset);
         }

@@ -40,7 +40,7 @@ namespace ByteStream.Unmanaged
         /// <param name="buffer">The buffer to use with this writer.</param>
         /// <param name="bufferLength">The amount of bytes that can be written.</param>
         public PtrWriter(IntPtr buffer, int length)
-            : this(buffer, length, 0)
+            : this(buffer, 0, length)
         { }
         /// <summary>
         /// Creates a new writer.

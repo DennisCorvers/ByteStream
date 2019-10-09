@@ -30,7 +30,7 @@ namespace ByteStreamTest.Unmanaged
             byte[] buf = new byte[30];
 
             Assert.Catch(typeof(ArgumentNullException), () =>
-            { var br = new PtrReader(IntPtr.Zero, 64); });
+            { var pr = new PtrReader(IntPtr.Zero, 64); });
 
             PtrReader reader = new PtrReader(m_buffer, 64);
             Assert.AreEqual(64, reader.Length);
@@ -54,26 +54,26 @@ namespace ByteStreamTest.Unmanaged
         [Test]
         public void CTorOffsetTest()
         {
-            PtrReader br = new PtrReader(m_buffer, 10, 15);
-            Assert.AreEqual(10, br.Offset);
-            Assert.AreEqual(15, br.Length);
+            PtrReader pr = new PtrReader(m_buffer, 10, 15);
+            Assert.AreEqual(10, pr.Offset);
+            Assert.AreEqual(15, pr.Length);
         }
 
         [Test]
         public void SkipBytesTest()
         {
-            var br = new PtrReader(m_buffer, 10);
-            Assert.Catch(typeof(InvalidOperationException), () => { br.SkipBytes(11); });
-            br.SkipBytes(10);
-            Assert.AreEqual(10, br.Offset);
+            var pr = new PtrReader(m_buffer, 10);
+            Assert.Catch(typeof(InvalidOperationException), () => { pr.SkipBytes(11); });
+            pr.SkipBytes(10);
+            Assert.AreEqual(10, pr.Offset);
         }
 
         [Test]
         public void ClearTest()
         {
-            var br = new PtrReader(m_buffer, 5, 5);
-            br.Clear();
-            Assert.AreEqual(0, br.Offset);
+            var pr = new PtrReader(m_buffer, 5, 5);
+            pr.Clear();
+            Assert.AreEqual(0, pr.Offset);
         }
     }
 }

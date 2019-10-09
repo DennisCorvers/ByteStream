@@ -1,5 +1,5 @@
 # ByteStream
-A blazing fast byte (de)serializer
+A blazing fast byte (de)serializer for C#
 
 ## What is ByteStream?
 Bytestream is a small library that enables blazing fast serialization of a collection of types to raw bytes. Either in the form of a byte array `byte[]` or unmanaged memory `IntPtr`.
@@ -62,6 +62,8 @@ When using ArraySegment, BitConverter and Unioning structs the user needs to kee
 Because the API is almost identical, the managed and unmanaged readers and writers function nearly identical. Be warned that when using the unmanaged reader or writer, the provided length must be no longer than the actual length of the memory block provided.
 
 It is important that you write and read back the values in the same order to keep data consistent (as shown in the write and read example).
+
+Because the readers and writers are value types, they must be passed along using the `ref` keyword.
 
 **The readers and writers are not thread safe! Beware of accessing buffers concurrently from multiple threads and modifying the supplied buffers during operation!**
 

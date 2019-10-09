@@ -48,10 +48,16 @@ namespace ByteStream.Unmanaged
         /// <param name="buffer"></param>
         /// <param name="offset"></param>
         /// <param name="length"></param>
-        public PtrWriter(IntPtr buffer, int length, int offset)
+        public PtrWriter(IntPtr buffer, int offset, int length)
         {
-            if (buffer == IntPtr.Zero) { throw new ArgumentNullException("buffer"); }
-            if (offset > length) { throw new ArgumentException("Offset exceeds buffer length."); }
+            if (buffer == IntPtr.Zero)
+            { throw new ArgumentNullException("buffer"); }
+            if (offset < 0)
+            { throw new ArgumentOutOfRangeException("offset"); }
+            if (length < 0)
+            { throw new ArgumentOutOfRangeException("count"); }
+            if (offset > length)
+            { throw new ArgumentException("Offset exceeds buffer length."); }
 
             m_buffer = buffer;
             m_offset = offset;

@@ -35,7 +35,7 @@ namespace ByteStream.Unmanaged
         /// <param name="buffer">The data to be read by this reader.</param>
         /// <param name="bufferLength">The amount of bytes that can be read.</param>
         public PtrReader(IntPtr buffer, int length)
-            : this(buffer, length, 0)
+            : this(buffer, 0, length)
         { }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace ByteStream.Unmanaged
         /// <param name="buffer">The data to be read by this reader.</param>
         /// <param name="length">The amount of bytes that can be read.</param>
         /// <param name="offset">The read offset.</param>
-        public PtrReader(IntPtr buffer, int length, int offset)
+        public PtrReader(IntPtr buffer, int offset, int length)
         {
             if (buffer == IntPtr.Zero) { throw new ArgumentNullException("data"); }
 

@@ -104,19 +104,5 @@ namespace ByteStreamTest.Managed
 
             Assert.AreEqual(value, BinaryHelper.Read<int>(newBuf, 0));
         }
-
-        //[TestCase(1598423)]
-        //public void CopyToPtrTest(int value)
-        //{
-        //    byte[] buf = new byte[8];
-        //    BinaryHelper.Write(buf, 0, value);
-
-        //    var writer = new ByteWriter(buf);
-        //    var newBuf = Marshal.AllocHGlobal(4);
-        //    writer.CopyTo(newBuf, 0, 4);
-
-        //    Assert.AreEqual(value, BinaryHelper.Read<int>(newBuf, 0));
-        //    Marshal.FreeHGlobal(newBuf);
-        //}
     }
 }

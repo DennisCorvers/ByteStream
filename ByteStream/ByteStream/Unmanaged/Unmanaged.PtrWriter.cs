@@ -7,10 +7,8 @@ using System.Text;
 
 namespace ByteStream.Unmanaged
 {
-    public struct PtrWriter : IWriter<PtrWriter>
+    public struct PtrWriter : IWriter
     {
-        private const int DEFAULTSIZE = 64;
-
 #pragma warning disable IDE0032
         private IntPtr m_buffer;
         private int m_length;
@@ -88,9 +86,9 @@ namespace ByteStream.Unmanaged
         /// Writes a blittable struct or primitive value to the buffer.
         /// </summary>
         /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
-        public PtrWriter Write<T>(T value) where T : unmanaged
+        public void Write<T>(T value) where T : unmanaged
         {
-            WriteValueInternal(value); return this;
+            WriteValueInternal(value);
         }
 
         /// <summary>
@@ -219,7 +217,6 @@ namespace ByteStream.Unmanaged
             m_offset += size;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureCapacity(int bytesToAdd)
         {
             if (m_length < m_offset + bytesToAdd)

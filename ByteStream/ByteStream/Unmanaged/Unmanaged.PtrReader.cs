@@ -133,7 +133,7 @@ namespace ByteStream.Unmanaged
         public string ReadUTF16Length()
         {
             ushort lengh = Read<ushort>();
-            return ReadUTF16(Length);
+            return ReadUTF16(lengh);
         }
         /// <summary>
         /// Reads a string in ANSI encoding. Length is automatically retrieved as an uint16.

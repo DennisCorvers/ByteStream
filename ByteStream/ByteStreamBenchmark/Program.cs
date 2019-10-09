@@ -1,6 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using ByteStreamBenchmark.Helpers;
+using ByteStreamBenchmark.Comparison;
 using System;
 
 namespace ByteStreamBenchmark
@@ -9,7 +9,7 @@ namespace ByteStreamBenchmark
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<StringHelperBM>();
+            BenchmarkRunner.Run<ReadCompare>();
             Console.ReadLine();
         }
     }

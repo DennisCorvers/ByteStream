@@ -7,7 +7,7 @@ using System.Text;
 
 namespace ByteStream.Mananged
 {
-    public struct ByteWriter : IWriter<ByteWriter>
+    public struct ByteWriter : IWriter
     {
         private const int DEFAULTSIZE = 64;
 
@@ -121,9 +121,9 @@ namespace ByteStream.Mananged
         /// Writes a blittable struct or primitive value to the buffer.
         /// </summary>
         /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
-        public ByteWriter Write<T>(T value) where T : unmanaged
+        public void Write<T>(T value) where T : unmanaged
         {
-            WriteValueInternal(value); return this;
+            WriteValueInternal(value);
         }
 
         /// <summary>

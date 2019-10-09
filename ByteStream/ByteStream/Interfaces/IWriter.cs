@@ -4,8 +4,8 @@ using System.Text;
 
 namespace ByteStream.Interfaces
 {
-    public interface IWriter<Y> : IBuffer
+    public interface IWriter : IBuffer
     {
-        Y Write<T>(T value) where T : unmanaged;
+        void Write<T>(T value) where T : unmanaged;
     }
 }

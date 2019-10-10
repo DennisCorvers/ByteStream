@@ -1,5 +1,6 @@
 ﻿using ByteStream.Interfaces;
 using ByteStream.Utils;
+using ByteStream.Utils.Unsafe;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -143,7 +144,6 @@ namespace ByteStream.Unmanaged
         }
         /// <summary>
         /// Writes a string in ANSI encoding. Each character requires 1 byte.
-        /// Does NOT include the length.
         /// </summary>
         /// <param name="value"></param>
         public void WriteANSI(string value, bool includeSize = false)

@@ -83,7 +83,7 @@ namespace ByteStream.Unmanaged
         /// <summary>
         /// Reads a byte-array from the current packet. Length is automatically read as an uint16.
         /// </summary>
-        public byte[] ReadBytesLength()
+        public byte[] ReadBytes()
         {
             ushort length = Read<ushort>();
             return ReadBytes(length);
@@ -104,6 +104,14 @@ namespace ByteStream.Unmanaged
         }
 
         /// <summary>
+        /// Reads a string as a double-byte character set. Length is automatically retrieved as an uint16.
+        /// </summary>
+        public string ReadUTF16()
+        {
+            ushort length = Read<ushort>();
+            return ReadUTF16(length);
+        }
+        /// <summary>
         /// Reads a string as a double-byte character set. Each character requires 2 bytes.
         /// Does NOT automatically read length.
         /// </summary>
@@ -115,6 +123,15 @@ namespace ByteStream.Unmanaged
             m_offset += stringLength * sizeof(char);
             return val;
         }
+
+        /// <summary>
+        /// Reads a string in ANSI encoding. Length is automatically retrieved as an uint16.
+        /// </summary>
+        public string ReadANSI()
+        {
+            ushort length = Read<ushort>();
+            return ReadANSI(length);
+        }
         /// <summary>
         /// Reads a string in ANSI encoding. Each character requires 1 byte.
         /// Does NOT automatically read length.
@@ -125,35 +142,6 @@ namespace ByteStream.Unmanaged
             string val = StringHelper.ReadANSI(m_buffer, m_offset, stringLength);
 
             m_offset += stringLength;
-            return val;
-        }
-        /// <summary>
-        /// Reads a string as a double-byte character set. Length is automatically retrieved as an uint16.
-        /// </summary>
-        public string ReadUTF16Length()
-        {
-            ushort lengh = Read<ushort>();
-            return ReadUTF16(lengh);
-        }
-        /// <summary>
-        /// Reads a string in ANSI encoding. Length is automatically retrieved as an uint16.
-        /// </summary>
-        public string ReadANSILength()
-        {
-            ushort length = Read<ushort>();
-            return ReadANSI(length);
-        }
-
-        /// <summary>
-        /// Reads a string in UTF16 encoding. Length is automatically retrieved as an uint16.
-        /// </summary>
-        public string ReadUTF16()
-        {
-            ushort length = Read<ushort>();
-            EnsureCapacity(length);
-            string val = StringHelper.ReadUTF16(m_buffer, m_offset, length);
-
-            m_offset += length * sizeof(char);
             return val;
         }
 

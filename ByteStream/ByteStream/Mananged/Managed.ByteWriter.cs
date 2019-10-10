@@ -178,7 +178,6 @@ namespace ByteStream.Mananged
         }
         /// <summary>
         /// Writes a string in ANSI encoding. Each character requires 1 byte.
-        /// Does NOT include the length.
         /// </summary>
         /// <param name="value"></param>
         public void WriteANSI(string value, bool includeSize = false)
@@ -200,32 +199,13 @@ namespace ByteStream.Mananged
         /// </summary>
         /// <param name="buffer">The destination for the data.</param>
         public void CopyTo(byte[] buffer)
-        {
-            if (buffer == null)
-            { throw new ArgumentNullException("buffer"); }
-
-            if (buffer.Length < m_offset)
-            { throw new ArgumentOutOfRangeException("destinationIndex", "Copy action exceeds the supplied buffer!"); }
-
-            m_buffer.CopyToUnsafe(0, buffer, 0, m_offset);
-        }
+        { CopyTo(buffer, 0, m_offset); }
         /// <summary>
         /// Copies the inner buffer to a supplied buffer.
         /// </summary>
         /// <param name="buffer">The destination for the data.</param>
         public void CopyTo(byte[] buffer, int destinationIndex)
-        {
-            if (buffer == null)
-            { throw new ArgumentNullException("buffer"); }
-
-            if (buffer.Length < destinationIndex + m_offset)
-            { throw new ArgumentOutOfRangeException("destinationIndex", "Copy action exceeds the supplied buffer!"); }
-
-            if (destinationIndex < 0)
-            { throw new ArgumentOutOfRangeException("destinationIndex"); }
-
-            m_buffer.CopyToUnsafe(0, buffer, destinationIndex, m_offset);
-        }
+        { CopyTo(buffer, destinationIndex, m_offset); }
         /// <summary>
         /// Copies the inner buffer to a supplied buffer.
         /// </summary>

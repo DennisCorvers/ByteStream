@@ -4,37 +4,10 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ByteStream.Utils
+namespace ByteStream.Utils.Unsafe
 {
     public static class Memory
     {
-        /// <summary>
-        /// Allocates memory using Marshal
-        /// </summary>
-        /// <param name="size"></param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntPtr Alloc(int size)
-        {
-            return Marshal.AllocHGlobal(size);
-        }
-        /// <summary>
-        /// Deallocates memory using Marshal
-        /// </summary>
-        /// <param name="ptr"></param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Dealloc(IntPtr ptr)
-        {
-            Marshal.FreeHGlobal(ptr);
-        }
-        /// <summary>
-        /// Resizes a pointer using Marshal alloc.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntPtr ResizePtr(IntPtr ptr, int newSize)
-        {
-            return Marshal.ReAllocHGlobal(ptr, (IntPtr)newSize);
-        }
         /// <summary>
         /// Copies memory between pointers. DOES NOT CHECK BOUNDARIES OR NULL!
         /// </summary>

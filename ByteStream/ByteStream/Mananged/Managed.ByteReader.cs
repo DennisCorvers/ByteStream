@@ -29,6 +29,13 @@ namespace ByteStream.Mananged
         /// </summary>
         public bool IsFixedSize
             => true;
+        /// <summary>
+        /// Gets the internal buffer used by this writer.
+        /// Do not modify the buffer while performing write operations.
+        /// </summary>
+        public byte[] Buffer
+            => m_buffer;
+
 
         /// <summary>
         /// Creates a new instance of bytereader.

@@ -19,7 +19,7 @@ Bytestream offers 2 sets of serializers and deserializers, called writers and re
 - Prefixes strings and memory blocks with a 2-byte length (optional).
 
 ## Supported types:
-- All types that adhere to the [managed constraint](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/unmanaged-types) can be written to, and read from the buffers.
+- All types that adhere to the [unmanaged constraint](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/unmanaged-types) can be written to, and read from the buffers.
 - Byte arrays
 - ANSI strings (1-byte per character)
 - UTF16 strings (2-byte per character, default in C#)
@@ -28,7 +28,7 @@ Bytestream offers 2 sets of serializers and deserializers, called writers and re
 
 ## Drawbacks
 - The ByteWriter and ByteReader makes heavy use of memory pinning. This can make the unmanaged variant preferable when possible.
-- The writers and readers always make use of pointer conversion. In the case of writing single-byte values to a byte[] buffer, consider directly writing these values to the buffer instead.
+- The writers and readers always make use of pointer conversion. In the case of writing single-byte values to a `byte[]` buffer, consider directly writing these values to the buffer instead.
 
 # Technical specifications:
 

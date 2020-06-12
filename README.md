@@ -1,11 +1,13 @@
 # ByteStream
-A blazing fast byte (de)serializer for C#. ByteStream is written in NetStandard2.0 making it compatible with .Net, .Net Core and Unity3D among things!
+A blazing fast byte (de)serializer for C#. 
 
 Available on Nuget via ```Install-Package ByteStream```
 
 ## What is ByteStream?
 Bytestream is a small library that enables blazing fast serialization of a collection of types to raw bytes. Either in the form of a byte array `byte[]` or unmanaged memory `IntPtr`.
 The library performs no memory allocation on its own, so you are free to use your own memory allocator!
+
+ByteStream is written in NetStandard2.0 making it compatible with .Net, .Net Core and Unity3D among things!
 
 *__Carefully read the Usage section__ for a brief introduction on how to use the library.*
 

@@ -1,5 +1,5 @@
 # ByteStream
-A blazing fast byte (de)serializer for C#
+A blazing fast byte (de)serializer for C#. ByteStream is written in NetStandard2.0 making it compatible with .Net, .Net Core and Unity3D among things!
 
 Available on Nuget via ```Install-Package ByteStream```
 

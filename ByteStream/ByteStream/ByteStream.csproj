@@ -3,6 +3,18 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>7.3</LangVersion>
+    <Authors>Dennis Corvers</Authors>
+    <Company />
+    <NeutralLanguage>en</NeutralLanguage>
+    <Description>Bytestream is a small library that enables blazing fast serialization of a collection of types to raw bytes. Either in the form of a byte array byte[] or unmanaged memory IntPtr. The library performs no memory allocation on its own, so you are free to use your own memory allocator!</Description>
+    <PackageLicenseUrl>MIT</PackageLicenseUrl>
+    <Copyright>Copyright (c) 2019 DennisCorvers</Copyright>
+    <RepositoryUrl>https://github.com/DennisCorvers/ByteStream</RepositoryUrl>
+    <PackageTags>serialization, fast, unmanaged, pointer, no allocations</PackageTags>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageProjectUrl />
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -12,7 +24,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
 
 </Project>

@@ -1,9 +1,13 @@
 # ByteStream
-A blazing fast byte (de)serializer for C#
+A blazing fast byte (de)serializer for C#. 
+
+Available on Nuget via ```Install-Package ByteStream```
 
 ## What is ByteStream?
 Bytestream is a small library that enables blazing fast serialization of a collection of types to raw bytes. Either in the form of a byte array `byte[]` or unmanaged memory `IntPtr`.
 The library performs no memory allocation on its own, so you are free to use your own memory allocator!
+
+ByteStream is written in NetStandard2.0 making it compatible with .Net, .Net Core and Unity3D among things!
 
 *__Carefully read the Usage section__ for a brief introduction on how to use the library.*
 
@@ -19,7 +23,7 @@ Bytestream offers 2 sets of serializers and deserializers, called writers and re
 - Prefixes strings and memory blocks with a 2-byte length (optional).
 
 ## Supported types:
-- All types that adhere to the [managed constraint](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/unmanaged-types) can be written to, and read from the buffers.
+- All types that adhere to the [unmanaged constraint](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/unmanaged-types) can be written to, and read from the buffers.
 - Byte arrays
 - ANSI strings (1-byte per character)
 - UTF16 strings (2-byte per character, default in C#)
@@ -28,7 +32,7 @@ Bytestream offers 2 sets of serializers and deserializers, called writers and re
 
 ## Drawbacks
 - The ByteWriter and ByteReader makes heavy use of memory pinning. This can make the unmanaged variant preferable when possible.
-- The writers and readers always make use of pointer conversion. In the case of writing single-byte values to a byte[] buffer, consider directly writing these values to the buffer instead.
+- The writers and readers always make use of pointer conversion. In the case of writing single-byte values to a `byte[]` buffer, consider directly writing these values to the buffer instead.
 
 # Technical specifications:
 

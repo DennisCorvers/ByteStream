@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace ByteStream.Utils.Unsafe
 {
-    public static class Memory
+    internal unsafe static class Memory
     {
         /// <summary>
         /// Copies memory between pointers. DOES NOT CHECK BOUNDARIES OR NULL!
@@ -17,13 +15,11 @@ namespace ByteStream.Utils.Unsafe
         /// <param name="destinationIndex">The destination index.</param>
         /// <param name="length">The amount of bytes to copy.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static void CopyMemory(IntPtr source, int sourceIndex, IntPtr destination, int destinationIndex, int length)
+        public static void CopyMemory(IntPtr source, int sourceIndex, IntPtr destination, int destinationIndex, int length)
         {
-            Buffer.MemoryCopy(
-                (source + sourceIndex).ToPointer(),
-                (destination + destinationIndex).ToPointer(),
-                length, length);
+            Buffer.MemoryCopy((byte*)source + sourceIndex, (byte*)destination + destinationIndex, length, length);
         }
+
         /// <summary>
         /// Copies memory between pointers. DOES NOT CHECK BOUNDARIES OR NULL!
         /// </summary>
@@ -33,11 +29,14 @@ namespace ByteStream.Utils.Unsafe
         /// <param name="destinationIndex">The destination index.</param>
         /// <param name="length">The amount of bytes to copy.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static void CopyMemory(byte[] source, int sourceIndex, IntPtr destination, int destinationIndex, int length)
+        public static void CopyMemory(byte[] source, int sourceIndex, IntPtr destination, int destinationIndex, int length)
         {
             fixed (byte* src = &source[sourceIndex])
-            { Buffer.MemoryCopy(src, (destination + destinationIndex).ToPointer(), length, length); }
+            {
+                Buffer.MemoryCopy(src, (byte*)destination + destinationIndex, length, length);
+            }
         }
+
         /// <summary>
         /// Copies memory between pointers. DOES NOT CHECK BOUNDARIES OR NULL!
         /// </summary>
@@ -47,10 +46,32 @@ namespace ByteStream.Utils.Unsafe
         /// <param name="destinationIndex">The destination index.</param>
         /// <param name="length">The amount of bytes to copy.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static void CopyMemory(IntPtr source, int sourceIndex, byte[] destination, int destinationIndex, int length)
+        public static void CopyMemory(IntPtr source, int sourceIndex, byte[] destination, int destinationIndex, int length)
         {
             fixed (byte* dst = &destination[destinationIndex])
-            { Buffer.MemoryCopy((source + sourceIndex).ToPointer(), dst, length, length); }
+            {
+                Buffer.MemoryCopy((byte*)source + sourceIndex, dst, length, length);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ClearMemory(IntPtr source, int length)
+        {
+            ClearMemory((void*)source, length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ClearMemory(void* source, int length)
+        {
+            long c = length >> 3; // longs
+
+            int i = 0;
+            for (; i < c; i++)
+                *((ulong*)source + i) = 0;
+
+            i = i << 3;
+            for (; i < length; i++)
+                *((byte*)source + i) = 0;
         }
     }
 }

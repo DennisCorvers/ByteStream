@@ -35,7 +35,7 @@ namespace ByteStreamTest.Managed
             { br = new ByteReader(buf, -1, -1); });
             Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
             { br = new ByteReader(buf, 0, -1); });
-            Assert.Catch(typeof(ArgumentException), () =>
+            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
             { br = new ByteReader(buf, 25, 6); });
         }
 

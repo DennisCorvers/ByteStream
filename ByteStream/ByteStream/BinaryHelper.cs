@@ -1,4 +1,5 @@
 ﻿using ByteStream.Utils;
+using ByteStream.Utils.Unsafe;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -19,6 +20,7 @@ namespace ByteStream
         {
             value.CopyToUnsafe(0, dest, offset, value.Length);
         }
+
         /// <summary>
         /// Writes a byte array to the specified memory.
         /// </summary>
@@ -27,9 +29,13 @@ namespace ByteStream
         /// <param name="value">The value to write to the destination.</param>
         public static void WriteBytes(IntPtr dest, int offset, byte[] value)
         {
-            if (value == null) { throw new ArgumentNullException("value"); }
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+
             fixed (byte* src = value)
-            { Buffer.MemoryCopy(src, (void*)(dest + offset), value.Length, value.Length); }
+            {
+                Buffer.MemoryCopy(src, (void*)(dest + offset), value.Length, value.Length);
+            }
         }
 
         /// <summary>
@@ -37,27 +43,27 @@ namespace ByteStream
         /// </summary>
         /// <param name="dest">The destination byte array.</param>
         /// <param name="offset">The current write offset.</param>
-        /// <param name="bytesToSkip">The amount of bytes to clear.</param>
-        public static void ClearBytes(byte[] dest, int offset, int bytesToSkip)
+        /// <param name="amount">The amount of bytes to clear.</param>
+        public static void ClearBytes(byte[] dest, int offset, int amount)
         {
-            if (bytesToSkip < 1) { throw new ArgumentOutOfRangeException("bytesToSkip", "Must be at least 1."); }
-
-            for (int i = 0; i < bytesToSkip; i++)
-            { dest[i + offset] = 0; }
+            Array.Clear(dest, offset, amount);
         }
+
         /// <summary>
         /// Skips a given number of bytes.
         /// </summary>
         /// <param name="dest">The destination memory.</param>
         /// <param name="offset">The current write offset.</param>
-        /// <param name="bytesToSkip">The amount of bytes to clear.</param>
-        public static void ClearBytes(IntPtr dest, int offset, int bytesToSkip)
+        /// <param name="amount">The amount of bytes to clear.</param>
+        public static void ClearBytes(IntPtr dest, int offset, int amount)
         {
-            if (bytesToSkip < 1) { throw new ArgumentOutOfRangeException("bytesToSkip", "Must be at least 1."); }
-            if (bytesToSkip > 1024) { throw new ArgumentOutOfRangeException("bytesToSkip", "Maximum allowed size is 1024"); }
+            if (amount < 1)
+                throw new ArgumentOutOfRangeException(nameof(amount), "Must be at least 1.");
 
-            byte* zeros = stackalloc byte[bytesToSkip];
-            Buffer.MemoryCopy(zeros, (void*)(dest + offset), bytesToSkip, bytesToSkip);
+            if (offset < 0)
+                throw new ArgumentOutOfRangeException(nameof(offset), "Must be at least 1.");
+
+            Memory.ClearMemory((byte*)dest + offset, amount);
         }
 
         /// <summary>
@@ -70,8 +76,11 @@ namespace ByteStream
         public static void Write<T>(byte[] dest, int offset, T value) where T : unmanaged
         {
             fixed (byte* ptr = &dest[offset])
-            { *(T*)ptr = value; }
+            {
+                *(T*)ptr = value;
+            }
         }
+
         /// <summary>
         /// Writes a blittable value type to the specified memory.
         /// </summary>
@@ -92,12 +101,15 @@ namespace ByteStream
         /// <param name="length">The total length of the byte buffer to read as an int32</param>
         public static byte[] ReadBytes(IntPtr data, int offset, int length)
         {
-            if (length < 1) { return new byte[0]; }
+            if (length < 1)
+                return new byte[0];
 
             byte[] result = new byte[length];
 
             fixed (byte* ptr = result)
-            { Buffer.MemoryCopy((byte*)data + offset, ptr, length, length); }
+            {
+                Buffer.MemoryCopy((byte*)data + offset, ptr, length, length);
+            }
 
             return result;
         }
@@ -109,7 +121,8 @@ namespace ByteStream
         /// <param name="length">The total length of the byte buffer to read as an int32</param>
         public static byte[] ReadBytes(byte[] bin, int offset, int length)
         {
-            if (length < 1) { return new byte[0]; }
+            if (length < 1)
+                return new byte[0];
 
             byte[] result = new byte[length];
 
@@ -126,8 +139,11 @@ namespace ByteStream
         public static T Read<T>(byte[] bin, int offset) where T : unmanaged
         {
             fixed (byte* ptr = &bin[offset])
-            { return *(T*)ptr; }
+            {
+                return *(T*)ptr;
+            }
         }
+
         /// <summary>
         /// Reads a blittable value type from the source memory.
         /// </summary>

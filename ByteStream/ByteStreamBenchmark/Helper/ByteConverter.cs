@@ -29,7 +29,7 @@ using System.Runtime.InteropServices;
 namespace ByteStreamBenchmark.Helper
 {
 
-
+#pragma warning disable IDE0034
     /// <summary>
     /// Temporariliy using the Utilities namespace to avoid collisions with the DLL still in use by NST
     /// </summary>

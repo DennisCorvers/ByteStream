@@ -2,18 +2,18 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace ByteStream.Unmanaged
+namespace ByteStream.Mananged
 {
-    public struct PtrReader : IReader
+    public struct ByteReader : IReader
     {
 #pragma warning disable IDE0032
-        private IntPtr m_buffer;
-        private int m_length;
+        private readonly byte[] m_buffer;
+        private readonly int m_length;
         private int m_offset;
 #pragma warning restore IDE0032
 
         /// <summary>
-        /// The length of this reader.
+        /// The length of this <see cref="ByteReader"/>.
         /// </summary>
         public int Length
             => m_length;
@@ -23,41 +23,45 @@ namespace ByteStream.Unmanaged
         public int Offset
             => m_offset;
         /// <summary>
-        /// Gets the internal buffer used by this writer.
-        /// Do not modify the buffer while performing write operations.
+        /// Determines if the <see cref="ByteReader"/> has a fixed size.
         /// </summary>
-        public IntPtr Buffer
+        public bool IsFixedSize
+            => true;
+        /// <summary>
+        /// Gets the internal buffer used by this <see cref="ByteReader"/>.
+        /// Do not modify the buffer while performing read operations.
+        /// </summary>
+        public byte[] Buffer
             => m_buffer;
 
-        /// <summary>
-        /// Creates a new reader.
-        /// </summary>
-        /// <param name="buffer">The data to be read by this reader.</param>
-        /// <param name="bufferLength">The amount of bytes that can be read.</param>
-        public PtrReader(IntPtr buffer, int length)
-            : this(buffer, 0, length)
-        { }
 
         /// <summary>
-        /// Creates a new reader.
+        /// Creates a new instance of <see cref="ByteReader"/>.
         /// </summary>
-        /// <param name="buffer">The data to be read by this reader.</param>
-        /// <param name="length">The amount of bytes that can be read.</param>
-        /// <param name="offset">The read offset.</param>
-        public PtrReader(IntPtr buffer, int offset, int length)
+        /// <param name="data">The data to read.</param>
+        public ByteReader(byte[] data)
         {
-            if (buffer == IntPtr.Zero) { throw new ArgumentNullException("data"); }
+            m_buffer = data ?? throw new ArgumentNullException("data");
 
-            if (offset < 0)
-            { throw new ArgumentOutOfRangeException("offset"); }
-            if (length < 0)
-            { throw new ArgumentOutOfRangeException("count"); }
-            if (offset > length)
-            { throw new ArgumentException("Out of bounds."); }
+            m_offset = 0;
+            m_length = data.Length;
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="ByteReader"/>.
+        /// </summary>
+        /// <param name="data">The data to read.</param>
+        /// <param name="offset">The read offset.</param>
+        /// <param name="length">The total amount of bytes available for reading.</param>
+        public ByteReader(byte[] data, int offset, int length)
+        {
+            m_buffer = data ?? throw new ArgumentNullException(nameof(data));
+
+            if ((uint)(offset + length) > data.Length)
+                throw new ArgumentOutOfRangeException("Offset + Length must be smaller than array length.");
 
             m_offset = offset;
             m_length = length;
-            m_buffer = buffer;
         }
 
         /// <summary>
@@ -67,13 +71,14 @@ namespace ByteStream.Unmanaged
         public void SkipBytes(int amount)
         {
             if (amount < 1)
-            { throw new ArgumentOutOfRangeException("amount"); }
+                throw new ArgumentOutOfRangeException(nameof(amount));
 
             EnsureCapacity(amount);
             m_offset += amount;
         }
+
         /// <summary>
-        /// Resets the offset to zero.
+        /// Resets the offset to its original position.
         /// </summary>
         public void Clear()
         {
@@ -81,7 +86,45 @@ namespace ByteStream.Unmanaged
         }
 
         /// <summary>
-        /// Reads a byte-array from the current packet. Length is automatically read as an uint16.
+        /// Reads a blittable struct or primitive value from the <see cref="ByteReader"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
+        public T Read<T>() where T : unmanaged
+        {
+            unsafe
+            {
+                int size = sizeof(T);
+                EnsureCapacity(size);
+                T val = BinaryHelper.Read<T>(m_buffer, m_offset);
+
+                m_offset += size;
+                return val;
+            }
+        }
+        /// <summary>
+        /// Tries to read a blittable struct or primitive value from the <see cref="ByteReader"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
+        /// <returns>Returns false if the value couldn't be read.</returns>
+        public bool TryRead<T>(out T value) where T : unmanaged
+        {
+            value = default;
+
+            unsafe
+            {
+                int size = sizeof(T);
+                if (m_offset + size > Length)
+                    return false;
+
+                value = BinaryHelper.Read<T>(m_buffer, m_offset);
+                m_offset += size;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Reads a byte-array from the <see cref="ByteReader"/>. Length is automatically read as an uint16.
         /// </summary>
         public byte[] ReadBytes()
         {
@@ -89,7 +132,7 @@ namespace ByteStream.Unmanaged
             return ReadBytes(length);
         }
         /// <summary>
-        /// Reads a byte-array from the current packet.
+        /// Reads a byte-array from the <see cref="ByteReader"/>.
         /// Does NOT automatically read length.
         /// </summary>
         /// <param name="length">The length of the byte-array.</param>
@@ -145,49 +188,11 @@ namespace ByteStream.Unmanaged
             return val;
         }
 
-        /// <summary>
-        /// Reads a blittable struct or primitive value from the buffer.
-        /// </summary>
-        /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
-        public T Read<T>() where T : unmanaged
-        {
-            return ReadValueInternal<T>();
-        }
-        /// <summary>
-        /// Tries to read a blittable struct or primitive value from the buffer.
-        /// </summary>
-        /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
-        /// <returns>Returns false if the value couldn't be read.</returns>
-        public bool TryRead<T>(out T value) where T : unmanaged
-        {
-            value = default;
-
-            unsafe
-            {
-                int size = sizeof(T);
-                if (m_offset + size > m_length) { return false; }
-                value = BinaryHelper.Read<T>(m_buffer, m_offset);
-                m_offset += size;
-            }
-            return true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private unsafe T ReadValueInternal<T>() where T : unmanaged
-        {
-            int size = sizeof(T);
-            EnsureCapacity(size);
-            T val = BinaryHelper.Read<T>(m_buffer, m_offset);
-
-            m_offset += size;
-            return val;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureCapacity(int bytesToRead)
         {
             if (bytesToRead + m_offset > m_length)
-            { throw new InvalidOperationException("Read operation exceeds buffer size."); }
+                throw new InvalidOperationException("Read operation exceeds buffer size.");
         }
     }
 }

@@ -80,7 +80,7 @@ namespace ByteStreamTest.Managed
             Assert.AreEqual(11, bw.Offset);
 
             bw.SkipBytes(100);
-            Assert.AreEqual(116.NextPowerOfTwo(), bw.Length);
+            Assert.AreEqual(MathUtils.NextPowerOfTwo(116), bw.Length);
         }
 
         [Test]

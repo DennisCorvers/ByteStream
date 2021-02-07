@@ -4,12 +4,12 @@ using System.Text;
 
 namespace ByteStream.Utils
 {
-    public static class Extensions
+    internal class MathUtils
     {
         /// <summary>
         /// Gets the next power of two of the current number.
         /// </summary>
-        public static int NextPowerOfTwo(this int num)
+        public static int NextPowerOfTwo(int num)
         {
             num--;
             num |= num >> 1;
@@ -20,6 +20,5 @@ namespace ByteStream.Utils
             num++;
             return num;
         }
-
     }
 }

@@ -57,7 +57,7 @@ namespace ByteStream.Unmanaged
                 throw new ArgumentOutOfRangeException(nameof(length));
 
             if ((uint)offset > length)
-            { throw new ArgumentOutOfRangeException("Offset exceeds buffer length."); }
+                throw new ArgumentOutOfRangeException("Offset exceeds buffer length.");
 
             m_buffer = buffer;
             m_offset = offset;
@@ -84,6 +84,26 @@ namespace ByteStream.Unmanaged
         {
             m_offset = 0;
         }
+
+
+        /// <summary>
+        /// Reserves 4-bytes of space for a size value at the start of the <see cref="PtrWriter"/>.
+        /// </summary>
+        public void ReserveSizePrefix()
+        {
+            EnsureCapacity(4);
+            m_offset += 4;
+        }
+
+        /// <summary>
+        /// Writes the total size at the start of the <see cref="PtrWriter"/> as an <see cref="int"/>.
+        /// </summary>
+        public int PrefixSize()
+        {
+            BinaryHelper.Write(m_buffer, 0, m_offset);
+            return m_offset;
+        }
+
 
         /// <summary>
         /// Writes a blittable struct or primitive value to the <see cref="PtrWriter"/>.

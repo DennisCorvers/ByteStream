@@ -47,7 +47,7 @@ namespace ByteStream.Mananged
         public ByteWriter(int initialSize, bool isFixedSize)
         {
             if (initialSize < 1)
-                throw new ArgumentException("initialSize");
+                throw new ArgumentException(nameof(initialSize));
 
             m_buffer = new byte[initialSize];
             m_isFixedSize = isFixedSize;
@@ -119,6 +119,26 @@ namespace ByteStream.Mananged
         {
             m_offset = 0;
         }
+
+
+        /// <summary>
+        /// Reserves 4-bytes of space for a size value at the start of the <see cref="ByteWriter"/>.
+        /// </summary>
+        public void ReserveSizePrefix()
+        {
+            EnsureCapacity(4);
+            m_offset += 4;
+        }
+
+        /// <summary>
+        /// Writes the total size at the start of the <see cref="ByteWriter"/> as an <see cref="int"/>.
+        /// </summary>
+        public int PrefixSize()
+        {
+            BinaryHelper.Write(m_buffer, 0, m_offset);
+            return m_offset;
+        }
+
 
 
         /// <summary>

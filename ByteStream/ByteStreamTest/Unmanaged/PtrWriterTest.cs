@@ -89,5 +89,23 @@ namespace ByteStreamTest.Unmanaged
             Assert.AreEqual(value, BinaryHelper.Read<int>(newBuf, 4));
             Marshal.FreeHGlobal(newBuf);
         }
+
+        [Test]
+        public void SizePrefixTest()
+        {
+            PtrWriter bw = new PtrWriter(m_buffer, 16);
+            bw.ReserveSizePrefix();
+            bw.Write(1);
+            bw.Write(2);
+            bw.Write(3);
+
+            Assert.AreEqual(16, bw.Offset);
+            Assert.AreEqual(16, bw.Length);
+
+            Assert.AreEqual(16, bw.PrefixSize());
+
+            PtrReader br = new PtrReader(bw.Buffer, 16);
+            Assert.AreEqual(16, br.Read<int>());
+        }
     }
 }

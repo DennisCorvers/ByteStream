@@ -8,13 +8,13 @@
     <NeutralLanguage>en</NeutralLanguage>
     <Description>Bytestream is a small library that enables blazing fast serialization of a collection of types to raw bytes. Either in the form of a byte array byte[] or unmanaged memory IntPtr. The library performs no memory allocation on its own, so you are free to use your own memory allocator!</Description>
     <PackageLicenseUrl>MIT</PackageLicenseUrl>
-    <Copyright>Copyright (c) 2019 DennisCorvers</Copyright>
+    <Copyright>Copyright (c) 2021 DennisCorvers</Copyright>
     <RepositoryUrl>https://github.com/DennisCorvers/ByteStream</RepositoryUrl>
     <PackageTags>serialization, fast, unmanaged, pointer, no allocations</PackageTags>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageProjectUrl />
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

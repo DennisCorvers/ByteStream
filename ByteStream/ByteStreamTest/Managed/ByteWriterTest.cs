@@ -104,5 +104,23 @@ namespace ByteStreamTest.Managed
 
             Assert.AreEqual(value, BinaryHelper.Read<int>(newBuf, 0));
         }
+
+        [Test]
+        public void SizePrefixTest()
+        {
+            ByteWriter bw = new ByteWriter(16, false);
+            bw.ReserveSizePrefix();
+            bw.Write(1);
+            bw.Write(2);
+            bw.Write(3);
+
+            Assert.AreEqual(16, bw.Offset);
+            Assert.AreEqual(16, bw.Length);
+
+            Assert.AreEqual(16, bw.PrefixSize());
+
+            ByteReader br = new ByteReader(bw.Buffer);
+            Assert.AreEqual(16, br.Read<int>());
+        }
     }
 }

@@ -106,5 +106,18 @@ namespace ByteStreamTest.Managed
             Assert.AreEqual(br.Offset, bw.Offset);
             Assert.AreEqual(value.Length, bw.Offset);
         }
+
+        [TestCase("手機瀏覽")]
+        [TestCase("Test.")]
+        public void StringTest(string value)
+        {
+            var bw = new ByteWriter(m_buffer);
+            bw.WriteString(value, Encoding.UTF32);
+
+            var br = new ByteReader(m_buffer);
+
+            Assert.AreEqual(value, br.ReadString(Encoding.UTF32));
+            Assert.AreEqual(bw.Offset, br.Offset);
+        }
     }
 }

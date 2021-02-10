@@ -39,34 +39,6 @@ namespace ByteStream
         }
 
         /// <summary>
-        /// Clears a given number of bytes.
-        /// </summary>
-        /// <param name="dest">The destination byte array.</param>
-        /// <param name="offset">The current write offset.</param>
-        /// <param name="amount">The amount of bytes to clear.</param>
-        public static void ClearBytes(byte[] dest, int offset, int amount)
-        {
-            Array.Clear(dest, offset, amount);
-        }
-
-        /// <summary>
-        /// Skips a given number of bytes.
-        /// </summary>
-        /// <param name="dest">The destination memory.</param>
-        /// <param name="offset">The current write offset.</param>
-        /// <param name="amount">The amount of bytes to clear.</param>
-        public static void ClearBytes(IntPtr dest, int offset, int amount)
-        {
-            if (amount < 1)
-                throw new ArgumentOutOfRangeException(nameof(amount), "Must be at least 1.");
-
-            if (offset < 0)
-                throw new ArgumentOutOfRangeException(nameof(offset), "Must be at least 1.");
-
-            Memory.ClearMemory((byte*)dest + offset, amount);
-        }
-
-        /// <summary>
         /// Writes a blittable value type to the specified byte array.
         /// </summary>
         /// <param name="dest">The destination byte array.</param>
@@ -94,6 +66,18 @@ namespace ByteStream
         }
 
         /// <summary>
+        /// Writes a blittable value type to the specified memory.
+        /// </summary>
+        /// <param name="dest">The destination memory.</param>
+        /// <param name="offset">The current write offset.</param>
+        /// <param name="value">The value to write to the destination.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Write<T>(void* dest, int offset, T value) where T : unmanaged
+        {
+            *(T*)((byte*)dest + offset) = value;
+        }
+
+        /// <summary>
         /// Reads a byte-memory from the source memory.
         /// </summary>
         /// <param name="data">The source memory.</param>
@@ -113,6 +97,7 @@ namespace ByteStream
 
             return result;
         }
+
         /// <summary>
         /// Reads a byte-array from the source array.
         /// </summary>
@@ -153,6 +138,17 @@ namespace ByteStream
         public static T Read<T>(IntPtr data, int offset) where T : unmanaged
         {
             return *(T*)(data + offset);
+        }
+
+        /// <summary>
+        /// Reads a blittable value type from the source memory.
+        /// </summary>
+        /// <param name="data">The source memory.</param>
+        /// <param name="offset">The current read offset.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T Read<T>(void* data, int offset) where T : unmanaged
+        {
+            return *(T*)((byte*)data + offset);
         }
     }
 }

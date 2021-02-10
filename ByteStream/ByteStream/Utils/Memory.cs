@@ -15,9 +15,9 @@ namespace ByteStream.Utils.Unsafe
         /// <param name="destinationIndex">The destination index.</param>
         /// <param name="length">The amount of bytes to copy.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyMemory(IntPtr source, int sourceIndex, IntPtr destination, int destinationIndex, int length)
+        public static void CopyMemory(void* source, void* destination, int length)
         {
-            Buffer.MemoryCopy((byte*)source + sourceIndex, (byte*)destination + destinationIndex, length, length);
+            Buffer.MemoryCopy(source, destination, length, length);
         }
 
         /// <summary>

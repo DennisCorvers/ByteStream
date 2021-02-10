@@ -71,16 +71,6 @@ namespace ByteStreamTest
                     Assert.True(other.IsEqual(dat));
                 }
             }
-
-            [Test]
-            public void ClearBytes()
-            {
-                Assert.Catch(() => { BinaryHelper.ClearBytes(m_buffer, 0, 0); });
-
-                BinaryHelper.Write<byte>(m_buffer, 0, 1);
-                BinaryHelper.ClearBytes(m_buffer, 0, 4);
-                Assert.AreEqual(0, BinaryHelper.Read<byte>(m_buffer, 0));
-            }
         }
         private class ByteArrTest
         {
@@ -138,17 +128,6 @@ namespace ByteStreamTest
                     var other = BinaryHelper.Read<BlittableStruct>(m_buffer, i);
                     Assert.True(other.IsEqual(dat));
                 }
-            }
-
-            [Test]
-            public void ClearBytes()
-            {
-                byte[] buf = new byte[4] { 1, 1, 1, 1 };
-                Assert.Catch(() => { BinaryHelper.ClearBytes(buf, -1, 0); });
-                Assert.Catch(() => { BinaryHelper.ClearBytes(buf, 0, -1); });
-
-                BinaryHelper.ClearBytes(buf, 1, 2);
-                Assert.AreEqual(new byte[] { 1, 0, 0, 1 }, buf);
             }
         }
     }

@@ -8,7 +8,7 @@ using System.Text;
 
 namespace ByteStream.Unmanaged
 {
-    public struct PtrWriter : IWriter
+    public unsafe struct PtrWriter : IWriter
     {
 #pragma warning disable IDE0032
         private readonly IntPtr m_buffer;
@@ -70,9 +70,6 @@ namespace ByteStream.Unmanaged
         /// <param name="amount">The amounts of bytes to skip.</param>
         public void SkipBytes(int amount)
         {
-            if (amount < 1)
-                throw new ArgumentOutOfRangeException(nameof(amount));
-
             EnsureCapacity(amount);
             m_offset += amount;
         }
@@ -91,8 +88,7 @@ namespace ByteStream.Unmanaged
         /// </summary>
         public void ReserveSizePrefix()
         {
-            EnsureCapacity(4);
-            m_offset += 4;
+            SkipBytes(sizeof(int));
         }
 
         /// <summary>
@@ -100,7 +96,7 @@ namespace ByteStream.Unmanaged
         /// </summary>
         public int PrefixSize()
         {
-            BinaryHelper.Write(m_buffer, 0, m_offset);
+            BinaryHelper.Write<int>(m_buffer, 0, m_offset);
             return m_offset;
         }
 
@@ -130,7 +126,9 @@ namespace ByteStream.Unmanaged
             unsafe
             {
                 int size = sizeof(T);
-                if (m_offset + size > m_length) { return false; }
+                if (m_offset + size > m_length)
+                    return false;
+
                 BinaryHelper.Write(m_buffer, m_offset, value);
                 m_offset += size;
             }
@@ -189,6 +187,23 @@ namespace ByteStream.Unmanaged
             EnsureCapacity(value.Length);
             StringHelper.WriteANSI(m_buffer, m_offset, value);
             m_offset += value.Length;
+        }
+
+        /// <summary>
+        /// Writes a string to the <see cref="ByteWriter"/>.
+        /// Includes the bytesize as a uint16.
+        /// </summary>
+        public void WriteString(string value, Encoding encoding)
+        {
+            int byteCount = encoding.GetByteCount(value);
+
+            if (byteCount > ushort.MaxValue)
+                throw new ArgumentOutOfRangeException(nameof(value), "String is too large to be written.");
+
+            EnsureCapacity(byteCount + sizeof(ushort));
+
+            Write((ushort)byteCount);
+            StringHelper.WriteString(m_buffer, m_offset, m_length, value, encoding);
         }
 
         /// <summary>
@@ -254,20 +269,20 @@ namespace ByteStream.Unmanaged
         public void CopyTo(IntPtr ptr, int destinationIndex, int length)
         {
             if (ptr == IntPtr.Zero)
-            { throw new ArgumentNullException(nameof(ptr)); }
+                throw new ArgumentNullException(nameof(ptr));
 
             if (destinationIndex < 0)
                 throw new ArgumentOutOfRangeException(nameof(destinationIndex));
 
             if ((uint)length > Length)
-            { throw new ArgumentOutOfRangeException(nameof(length)); }
+                throw new ArgumentOutOfRangeException(nameof(length));
 
-            Memory.CopyMemory(m_buffer, 0, ptr, destinationIndex, length);
+            Memory.CopyMemory((void*)m_buffer, (byte*)ptr + destinationIndex, length);
         }
 
         private void EnsureCapacity(int bytesToAdd)
         {
-            if (m_length < m_offset + bytesToAdd)
+            if (m_length < m_offset + (uint)bytesToAdd)
                 throw new InvalidOperationException("Unable to write more data.");
         }
     }

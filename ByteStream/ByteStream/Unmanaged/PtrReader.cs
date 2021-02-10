@@ -1,6 +1,7 @@
 ﻿using ByteStream.Interfaces;
 using System;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace ByteStream.Unmanaged
 {
@@ -154,6 +155,18 @@ namespace ByteStream.Unmanaged
             return val;
         }
 
+        /// <summary>
+        /// Reads a string from the <see cref="ByteReader"/>.
+        /// Length is automatically retrieved.
+        /// </summary>
+        /// <returns></returns>
+        public string ReadString(Encoding encoding)
+        {
+            int byteCount = Read<ushort>();
+
+            EnsureCapacity(byteCount);
+            return StringHelper.ReadString(m_buffer, m_offset, byteCount, encoding);
+        }
 
         /// <summary>
         /// Reads a blittable struct or primitive value from the <see cref="PtrReader"/>.

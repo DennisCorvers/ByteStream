@@ -1,6 +1,7 @@
 ﻿using ByteStream.Interfaces;
 using System;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace ByteStream.Mananged
 {
@@ -186,6 +187,19 @@ namespace ByteStream.Mananged
 
             m_offset += stringLength;
             return val;
+        }
+
+        /// <summary>
+        /// Reads a string from the <see cref="ByteReader"/>.
+        /// Length is automatically retrieved.
+        /// </summary>
+        /// <returns></returns>
+        public string ReadString(Encoding encoding)
+        {
+            int byteCount = Read<ushort>();
+
+            EnsureCapacity(byteCount);
+            return StringHelper.ReadString(m_buffer, m_offset, byteCount, encoding);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

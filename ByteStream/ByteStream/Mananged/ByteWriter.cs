@@ -97,7 +97,7 @@ namespace ByteStream.Mananged
         public void SkipBytes(int amount)
         {
             if (amount < 1)
-                throw new ArgumentOutOfRangeException("amount");
+                throw new ArgumentOutOfRangeException(nameof(amount), "Amount needs to be at least 1.");
 
             EnsureCapacity(amount);
             m_offset += amount;
@@ -126,8 +126,7 @@ namespace ByteStream.Mananged
         /// </summary>
         public void ReserveSizePrefix()
         {
-            EnsureCapacity(4);
-            m_offset += 4;
+            SkipBytes(sizeof(int));
         }
 
         /// <summary>
@@ -217,7 +216,7 @@ namespace ByteStream.Mananged
         /// <summary>
         /// Writes a string in ANSI encoding. Each character requires 1 byte.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="includeSize">TRUE to include the size as an uint16</param>
         public void WriteANSI(string value, bool includeSize = false)
         {
             if (includeSize)
@@ -233,6 +232,22 @@ namespace ByteStream.Mananged
             m_offset += value.Length;
         }
 
+        /// <summary>
+        /// Writes a string to the <see cref="ByteWriter"/>.
+        /// Includes the bytesize as a uint16.
+        /// </summary>
+        public void WriteString(string value, Encoding encoding)
+        {
+            int byteCount = encoding.GetByteCount(value);
+
+            if (byteCount > ushort.MaxValue)
+                throw new ArgumentOutOfRangeException(nameof(value), "String is too large to be written.");
+
+            EnsureCapacity(byteCount + sizeof(ushort));
+
+            Write((ushort)byteCount);
+            StringHelper.WriteString(m_buffer, m_offset, value, encoding);
+        }
 
         /// <summary>
         /// Copies the inner buffer to a supplied buffer.

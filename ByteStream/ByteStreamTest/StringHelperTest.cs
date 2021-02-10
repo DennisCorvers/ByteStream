@@ -20,8 +20,7 @@ namespace ByteStreamTest
             }
             ~IntPtrTest()
             {
-                if (m_buffer != IntPtr.Zero)
-                { Marshal.FreeHGlobal(m_buffer); }
+                Marshal.FreeHGlobal(m_buffer);
             }
 
             [TestCase("手機瀏覽")]
@@ -47,7 +46,19 @@ namespace ByteStreamTest
                 for (int i = 0; i < 4 * length; i += length)
                 { Assert.AreEqual(value, StringHelper.ReadANSI(m_buffer, i, value.Length)); }
             }
+
+            [TestCase("手機瀏覽")]
+            [TestCase("<Some^Sample^Text>")]
+            public void EncodingTest(string value)
+            {
+                var encoding = Encoding.UTF7;
+
+                int byteCount = StringHelper.WriteString(m_buffer, 0, 64, value, encoding);
+
+                Assert.AreEqual(value, StringHelper.ReadString(m_buffer, 0, byteCount, encoding));
+            }
         }
+
         private class ByteArrTest
         {
             private readonly byte[] m_buffer;
@@ -79,6 +90,39 @@ namespace ByteStreamTest
 
                 for (int i = 0; i < 4 * length; i += length)
                 { Assert.AreEqual(value, StringHelper.ReadANSI(m_buffer, i, value.Length)); }
+            }
+
+            [TestCase("手機瀏覽")]
+            [TestCase("<Some^Sample^Text>")]
+            public void EncodingTest(string value)
+            {
+                var encoding = Encoding.UTF7;
+
+                int byteCount = StringHelper.WriteString(m_buffer, 0, value, encoding);
+
+                Assert.AreEqual(value, StringHelper.ReadString(m_buffer, 0, byteCount, encoding));
+            }
+
+            [Test]
+            public void EncodingFaultTest()
+            {
+                var value = @"<Some^Sample^Text>";
+
+                // Use a buffer that is too small for the string.
+                var buffer = new byte[8];
+                var encoding = Encoding.UTF7;
+
+                Assert.Catch<ArgumentException>(() =>
+                {
+                    StringHelper.WriteString(buffer, 0, value, encoding);
+                });
+
+                int byteCount = encoding.GetByteCount(value);
+
+                Assert.Catch<ArgumentOutOfRangeException>(() =>
+                {
+                    Assert.AreEqual(value, StringHelper.ReadString(buffer, 0, byteCount, encoding));
+                });
             }
         }
     }

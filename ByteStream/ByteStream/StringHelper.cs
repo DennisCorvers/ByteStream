@@ -1,9 +1,15 @@
-﻿using System;
+﻿using ByteStream.Utils.Unsafe;
+using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace ByteStream
 {
     public unsafe static class StringHelper
     {
+        private const int StrBufSize = 1024;
+
         /// <summary>
         /// Reads a string as a double-byte character set. Each character requires 2 bytes.
         /// </summary>
@@ -154,6 +160,66 @@ namespace ByteStream
                 *((byte*)dest + offset + i) = (byte)value[i];
 
             return value.Length;
+        }
+
+
+        /// <summary>
+        /// Writes a string to the supplied buffer.
+        /// </summary>
+        public static int WriteString(byte[] data, int offset, string value, Encoding encoding)
+        {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
+            if ((uint)offset > data.Length)
+                throw new ArgumentOutOfRangeException(nameof(offset));
+
+            return encoding.GetBytes(value, 0, value.Length, data, offset);
+        }
+
+        /// <summary>
+        /// Writes a string to the supplied buffer.
+        /// </summary>
+        /// <param name="dataLength">The length of the supplied buffer.</param>
+        public static int WriteString(IntPtr data, int offset, int dataLength, string value, Encoding encoding)
+        {
+            if (data == IntPtr.Zero)
+                throw new ArgumentNullException(nameof(data));
+
+            if ((uint)offset > dataLength)
+                throw new ArgumentOutOfRangeException("Offset must be smaller than dataLength");
+
+            fixed (char* str = value)
+            {
+                return encoding.GetBytes(str, value.Length, ((byte*)data) + offset, dataLength);
+            }
+        }
+
+        /// <summary>
+        /// Reads a string from the supplied buffer.
+        /// </summary>
+        /// <param name="byteCount">The total length in bytes of the endcoded string.</param>
+        public static string ReadString(byte[] data, int offset, int byteCount, Encoding encoding)
+        {
+            if (byteCount <= 0)
+                return string.Empty;
+
+            if ((uint)offset + byteCount > data.Length)
+                throw new ArgumentOutOfRangeException("ByteCount + Offset is larger than data length.");
+
+            fixed (byte* ptr = data)
+            {
+                return ReadString((IntPtr)ptr, offset, byteCount, encoding);
+            }
+        }
+
+        /// <summary>
+        /// Reads a string from the supplied buffer.
+        /// </summary>
+        /// <param name="byteCount">The total length in bytes of the endcoded string.</param>
+        public static string ReadString(IntPtr data, int offset, int byteCount, Encoding encoding)
+        {
+            return new string((sbyte*)data, offset, byteCount, encoding);
         }
     }
 }

@@ -8,14 +8,19 @@ using System.Runtime.InteropServices;
 
 namespace ByteStreamBenchmark.Comparison
 {
+    [MemoryDiagnoser]
     public class ReadCompare
     {
         private const int AMOUNT = 1024;
         private readonly byte[] m_byteBuf;
         private readonly IntPtr m_ptrBuf;
+        private readonly ManagedStream managedStream;
+        private readonly UnmanagedStream unmanagedStream;
 
         public ReadCompare()
         {
+            managedStream = new ManagedStream();
+            unmanagedStream = new UnmanagedStream();
             int size = sizeof(int) * AMOUNT;
             m_byteBuf = new byte[size];
             m_ptrBuf = Marshal.AllocHGlobal(size);
@@ -46,6 +51,28 @@ namespace ByteStreamBenchmark.Comparison
             PtrReader reader = new PtrReader(m_ptrBuf, AMOUNT * sizeof(int));
             for (int i = 0; i < AMOUNT; i++)
             { int result = reader.Read<int>(); }
+        }
+
+        [Benchmark]
+        public void ManagedStream()
+        {
+            managedStream.ResetRead(m_byteBuf);
+
+            for (int i = 0; i < AMOUNT; i++)
+            {
+                int result = managedStream.Read<int>();
+            }
+        }
+
+        [Benchmark]
+        public void UnmanagedStream()
+        {
+            unmanagedStream.ResetRead(m_ptrBuf, AMOUNT * sizeof(int));
+
+            for (int i = 0; i < AMOUNT; i++)
+            {
+                int result = unmanagedStream.Read<int>();
+            }
         }
 
         [Benchmark(Baseline = true)]

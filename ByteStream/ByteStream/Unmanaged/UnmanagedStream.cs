@@ -1,37 +1,33 @@
 ﻿using ByteStream.Interfaces;
-using ByteStream.Utils;
 using ByteStream.Utils.Unsafe;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ByteStream.Mananged
+namespace ByteStream.Unmanaged
 {
-    public unsafe class ManagedStream : IWriter, IReader, IByteStream
+    public unsafe class UnmanagedStream : IWriter, IReader, IByteStream
     {
-        public const int DefaultBufferSize = 1024;
         private const string BUFFER_OVERFLOW = "Buffer is set to a fixed size and cannot resize automatically.";
 
 #pragma warning disable IDE0032
-        private byte[] m_buffer;
+        private IntPtr m_buffer;
         private int m_offset;
+        private int m_length;
         private SerializationMode m_mode;
-
-        private bool m_isFixedSize;
 #pragma warning restore
 
         /// <summary>
-        /// The current <see cref="ManagedStream"/> offset in.
+        /// The current <see cref="UnmanagedStream"/> offset in.
         /// </summary>
         public int Offset
             => m_offset;
         /// <summary>
-        /// The total <see cref="ManagedStream"/> length in bytes.
+        /// The total <see cref="UnmanagedStream"/> length in bytes.
         /// </summary>
         public int Length
-            => m_buffer.Length;
+            => m_length;
 
         /// <summary>
         /// The current streaming mode.
@@ -39,118 +35,110 @@ namespace ByteStream.Mananged
         public SerializationMode Mode
             => m_mode;
         /// <summary>
-        /// Determines if the <see cref="ManagedStream"/> is writing.
+        /// Determines if the <see cref="UnmanagedStream"/> is writing.
         /// </summary>
         public bool IsWriting
             => m_mode == SerializationMode.Writing;
         /// <summary>
-        /// Determines if the <see cref="ManagedStream"/> is reading.
+        /// Determines if the <see cref="UnmanagedStream"/> is reading.
         /// </summary>
         public bool IsReading
             => m_mode == SerializationMode.Reading;
         /// <summary>
-        /// The inner buffer used by the <see cref="ManagedStream"/>.
+        /// The inner buffer used by the <see cref="UnmanagedStream"/>.
         /// </summary>
-        public byte[] Buffer
+        public IntPtr Buffer
             => m_buffer;
-        /// <summary>
-        /// A fixed-size buffer will not resize itself.
-        /// </summary>
-        public bool IsFixedSize
-            => m_isFixedSize;
 
 
-        public ManagedStream() { }
+        public UnmanagedStream() { }
 
 
         /// <summary>
-        /// Resets the <see cref="ManagedStream"/> for reading.
+        /// Resets the <see cref="UnmanagedStream"/> for reading.
         /// </summary>
         public void ResetRead()
         {
-            if (m_buffer == null)
+            if (m_buffer == IntPtr.Zero)
                 throw new InvalidOperationException("Stream has no buffer assigned.");
 
             Reset(0, SerializationMode.Reading);
         }
 
         /// <summary>
-        /// Resets the <see cref="ManagedStream"/> for reading.
+        /// Resets the <see cref="UnmanagedStream"/> for reading.
         /// </summary>
         /// <param name="data">The buffer to read from.</param>
-        public void ResetRead(byte[] data)
+        public void ResetRead(IntPtr data, int length)
         {
             m_buffer = data;
-            Reset(0, SerializationMode.Reading);
+            m_length = length;
+
+            ResetRead(data, 0, length);
         }
 
         /// <summary>
-        /// Resets the <see cref="ManagedStream"/> for reading.
+        /// Resets the <see cref="UnmanagedStream"/> for reading.
         /// </summary>
         /// <param name="data">The data to read.</param>
         /// <param name="offset">The read offset.</param>
         /// <param name="length">The total amount of bytes available for reading.</param>
-        public void ResetRead(byte[] data, int offset, int length)
+        public void ResetRead(IntPtr data, int offset, int length)
         {
-            m_buffer = data ?? throw new ArgumentNullException(nameof(data));
+            if (data == IntPtr.Zero)
+                throw new ArgumentNullException(nameof(data));
 
-            if ((uint)(offset + length) > data.Length)
-                throw new ArgumentOutOfRangeException("Offset + Length must be smaller than array length.");
+            if (length < 1)
+                throw new ArgumentOutOfRangeException(nameof(length));
+
+            if ((uint)offset > length)
+                throw new ArgumentOutOfRangeException("Offset must be smaller than length.");
+
+            m_buffer = data;
+            m_length = length;
 
             Reset(offset, SerializationMode.Reading);
         }
 
-
         /// <summary>
-        /// Resets the <see cref="ManagedStream"/> for writing.
-        /// </summary>
-        public void ResetWrite()
-        {
-            m_buffer = new byte[DefaultBufferSize];
-            m_isFixedSize = false;
-            Reset(0, SerializationMode.Writing);
-        }
-
-        /// <summary>
-        /// Resets the <see cref="ManagedStream"/> for writing.
-        /// </summary>
-        /// <param name="initialSize">The starting size of the buffer.</param>
-        /// <param name="isFixedSize">FALSE if the buffer can automatically resize.</param>
-        public void ResetWrite(int initialSize, bool isFixedSize = false)
-        {
-            if (initialSize < 1)
-                throw new ArgumentException(nameof(initialSize));
-
-            m_buffer = new byte[initialSize];
-            m_isFixedSize = isFixedSize;
-
-            Reset(0, SerializationMode.Writing);
-        }
-
-        /// <summary>
-        /// Resets the <see cref="ManagedStream"/> for writing.
+        /// Resets the <see cref="UnmanagedStream"/> for writing.
         /// </summary>
         /// <param name="data">The byte array to wrap.</param>
-        /// <param name="isFixedSize">FALSE if the buffer can automatically resize.</param>
-        public void ResetWrite(byte[] data, bool isFixedSize = false)
+        /// <param name="length">The total amount of bytes available for writing.</param>
+        public void ResetWrite(IntPtr data, int length)
         {
-            m_buffer = data ?? throw new ArgumentNullException(nameof(data));
-            m_isFixedSize = isFixedSize;
+            if (data == IntPtr.Zero)
+                throw new ArgumentNullException(nameof(data));
+
+            if (length < 1)
+                throw new ArgumentOutOfRangeException(nameof(length));
+
+            m_buffer = data;
+            m_length = length;
 
             Reset(0, SerializationMode.Writing);
         }
 
         /// <summary>
-        /// Resets the <see cref="ManagedStream"/> for writing.
+        /// Resets the <see cref="UnmanagedStream"/> for writing.
         /// </summary>
         /// <param name="data">The byte array to wrap.</param>
         /// <param name="offset">The write offset.</param>
-        public void ResetWrite(byte[] data, int offset)
+        public void ResetWrite(IntPtr data, int offset, int length)
         {
-            m_buffer = data ?? throw new ArgumentNullException(nameof(data));
-            m_isFixedSize = true;
+            if (data == IntPtr.Zero)
+                throw new ArgumentNullException(nameof(data));
 
-            Reset(0, SerializationMode.Writing);
+            if (length < 1)
+                throw new ArgumentOutOfRangeException(nameof(length));
+
+            if ((uint)offset > length)
+                throw new ArgumentOutOfRangeException("Offset must be smaller than length.");
+
+            m_buffer = data;
+            m_length = length;
+
+            Reset(offset, SerializationMode.Writing);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -170,7 +158,7 @@ namespace ByteStream.Mananged
             if (amount < 1)
                 throw new ArgumentOutOfRangeException(nameof(amount), "Amount needs to be at least 1.");
 
-            EnsureWriteCapacity(amount);
+            EnsureCapacity(amount);
             m_offset += amount;
         }
 
@@ -193,28 +181,28 @@ namespace ByteStream.Mananged
 
 
         /// <summary>
-        /// Reads a blittable struct or primitive value from the <see cref="ManagedStream"/>.
+        /// Reads a blittable struct or primitive value from the <see cref="UnmanagedStream"/>.
         /// </summary>
         /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ManagedStream Peek<T>(ref T value) where T : unmanaged
+        public UnmanagedStream Peek<T>(ref T value) where T : unmanaged
         {
             int size = sizeof(T);
-            EnsureReadCapacity(size);
+            EnsureCapacity(size);
             value = BinaryHelper.Read<T>(m_buffer, m_offset);
 
             return this;
         }
 
         /// <summary>
-        /// Reads a blittable struct or primitive value from the <see cref="ManagedStream"/>.
+        /// Reads a blittable struct or primitive value from the <see cref="UnmanagedStream"/>.
         /// </summary>
         /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ManagedStream Read<T>(ref T value) where T : unmanaged
+        public UnmanagedStream Read<T>(ref T value) where T : unmanaged
         {
             int size = sizeof(T);
-            EnsureReadCapacity(size);
+            EnsureCapacity(size);
 
             value = BinaryHelper.Read<T>(m_buffer, m_offset);
             m_offset += size;
@@ -223,13 +211,13 @@ namespace ByteStream.Mananged
         }
 
         /// <summary>
-        /// Reads a value from the <see cref="ManagedStream"/>. Can overwrite value with default.
+        /// Reads a value from the <see cref="UnmanagedStream"/>. Can overwrite value with default.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Read<T>() where T : unmanaged
         {
             int size = sizeof(T);
-            EnsureReadCapacity(size);
+            EnsureCapacity(size);
 
             var value = BinaryHelper.Read<T>(m_buffer, m_offset);
             m_offset += size;
@@ -238,14 +226,14 @@ namespace ByteStream.Mananged
         }
 
         /// <summary>
-        /// Writes a blittable struct or primitive value to the <see cref="ManagedStream"/>.
+        /// Writes a blittable struct or primitive value to the <see cref="UnmanagedStream"/>.
         /// </summary>
         /// <typeparam name="T">The type of the blittable struct/primitive.</typeparam>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ManagedStream Write<T>(T value) where T : unmanaged
+        public UnmanagedStream Write<T>(T value) where T : unmanaged
         {
             int size = sizeof(T);
-            EnsureWriteCapacity(size);
+            EnsureCapacity(size);
             BinaryHelper.Write(m_buffer, m_offset, value);
             m_offset += size;
 
@@ -253,7 +241,7 @@ namespace ByteStream.Mananged
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ManagedStream Serialize<T>(ref T value) where T : unmanaged
+        public UnmanagedStream Serialize<T>(ref T value) where T : unmanaged
         {
             if (m_mode == SerializationMode.Writing) Write(value);
             else Read(ref value);
@@ -263,10 +251,10 @@ namespace ByteStream.Mananged
 
 
         /// <summary>
-        /// Writes a byte array to the <see cref="ManagedStream"/>.
+        /// Writes a byte array to the <see cref="UnmanagedStream"/>.
         /// </summary>
         /// <param name="includeSize">TRUE to include the size as an uint16</param>
-        public ManagedStream WriteBytes(byte[] value, bool includeSize = true)
+        public UnmanagedStream WriteBytes(byte[] value, bool includeSize = true)
         {
             if (includeSize)
             {
@@ -276,7 +264,7 @@ namespace ByteStream.Mananged
                 Write((ushort)value.Length);
             }
 
-            EnsureReadCapacity(value.Length);
+            EnsureCapacity(value.Length);
             BinaryHelper.WriteBytes(m_buffer, m_offset, value);
             m_offset += value.Length;
 
@@ -287,7 +275,7 @@ namespace ByteStream.Mananged
         /// Writes a string as a double-byte character set. Each character requires 2 bytes.
         /// </summary>
         /// <param name="includeSize">TRUE to include the size as an uint16</param>
-        public ManagedStream WriteUTF16(string value, bool includeSize = true)
+        public UnmanagedStream WriteUTF16(string value, bool includeSize = true)
         {
             if (includeSize)
             {
@@ -297,7 +285,7 @@ namespace ByteStream.Mananged
                 Write((ushort)value.Length);
             }
 
-            EnsureWriteCapacity(value.Length * sizeof(char));
+            EnsureCapacity(value.Length * sizeof(char));
             StringHelper.WriteANSI(m_buffer, m_offset, value);
             m_offset += value.Length * sizeof(char);
 
@@ -308,7 +296,7 @@ namespace ByteStream.Mananged
         /// Writes a string in ANSI encoding. Each character requires 1 byte.
         /// </summary>
         /// <param name="includeSize">TRUE to include the size as an uint16</param>
-        public ManagedStream WriteANSI(string value, bool includeSize = true)
+        public UnmanagedStream WriteANSI(string value, bool includeSize = true)
         {
             if (includeSize)
             {
@@ -318,7 +306,7 @@ namespace ByteStream.Mananged
                 Write((ushort)value.Length);
             }
 
-            EnsureWriteCapacity(value.Length);
+            EnsureCapacity(value.Length);
             StringHelper.WriteANSI(m_buffer, m_offset, value);
             m_offset += value.Length;
 
@@ -329,17 +317,17 @@ namespace ByteStream.Mananged
         /// Writes a string to the <see cref="ByteWriter"/>.
         /// Includes the bytesize as a uint16.
         /// </summary>
-        public ManagedStream WriteString(string value, Encoding encoding)
+        public UnmanagedStream WriteString(string value, Encoding encoding)
         {
             int byteCount = encoding.GetByteCount(value);
 
             if (byteCount > ushort.MaxValue)
                 throw new ArgumentOutOfRangeException(nameof(value), "String is too large to be written.");
 
-            EnsureWriteCapacity(byteCount + sizeof(ushort));
+            EnsureCapacity(byteCount + sizeof(ushort));
 
             Write((ushort)byteCount);
-            StringHelper.WriteString(m_buffer, m_offset, value, encoding);
+            StringHelper.WriteString(m_buffer, m_offset, m_length, value, encoding);
 
             m_offset += byteCount;
 
@@ -363,7 +351,7 @@ namespace ByteStream.Mananged
         /// <returns></returns>
         public byte[] ReadBytes(int length)
         {
-            EnsureReadCapacity(length);
+            EnsureCapacity(length);
 
             var value = BinaryHelper.ReadBytes(m_buffer, m_offset, length);
 
@@ -387,7 +375,7 @@ namespace ByteStream.Mananged
         /// </summary>
         public string ReadUTF16(int stringLength)
         {
-            EnsureReadCapacity(stringLength * sizeof(char));
+            EnsureCapacity(stringLength * sizeof(char));
 
             var value = StringHelper.ReadUTF16(m_buffer, m_offset, stringLength);
 
@@ -412,7 +400,7 @@ namespace ByteStream.Mananged
         /// </summary>
         public string ReadANSI(int stringLength)
         {
-            EnsureReadCapacity(stringLength);
+            EnsureCapacity(stringLength);
             var value = StringHelper.ReadANSI(m_buffer, m_offset, stringLength);
 
             m_offset += stringLength;
@@ -421,7 +409,7 @@ namespace ByteStream.Mananged
         }
 
         /// <summary>
-        /// Reads a string from the <see cref="ManagedStream"/>.
+        /// Reads a string from the <see cref="UnmanagedStream"/>.
         /// Length is automatically retrieved.
         /// </summary>
         /// <returns></returns>
@@ -430,8 +418,8 @@ namespace ByteStream.Mananged
             ushort byteCount = 0;
             Read(ref byteCount);
 
-            EnsureReadCapacity(byteCount);
-            var value = StringHelper.ReadString(m_buffer, m_offset, byteCount, encoding);
+            EnsureCapacity(byteCount);
+            var value = StringHelper.ReadString((IntPtr)m_buffer, m_offset, byteCount, encoding);
             m_offset += byteCount;
 
             return value;
@@ -479,7 +467,7 @@ namespace ByteStream.Mananged
             if ((uint)length > Length)
                 throw new ArgumentOutOfRangeException(nameof(length));
 
-            m_buffer.CopyToUnsafe(0, buffer, destinationIndex, length);
+            Memory.CopyMemory(m_buffer, 0, buffer, destinationIndex, length);
         }
 
         /// <summary>
@@ -516,37 +504,23 @@ namespace ByteStream.Mananged
             if ((uint)length > Length)
                 throw new ArgumentOutOfRangeException(nameof(length));
 
-            Memory.CopyMemory(m_buffer, 0, ptr, destinationIndex, length);
+            Memory.CopyMemory((void*)m_buffer, (byte*)ptr + destinationIndex, length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void EnsureWriteCapacity(int size)
+        private void EnsureCapacity(int size)
         {
-            if (m_offset + size > m_buffer.Length)
-            {
-                if (m_isFixedSize)
-                {
-                    throw new InvalidOperationException(BUFFER_OVERFLOW);
-                }
-
-                ArrayExtensions.ResizeUnsafe(ref m_buffer, MathUtils.NextPowerOfTwo(m_offset + size));
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void EnsureReadCapacity(int size)
-        {
-            if (m_offset + size > m_buffer.Length)
+            if (m_offset + size > m_length)
                 throw new InvalidOperationException(BUFFER_OVERFLOW);
         }
 
         /// <summary>
-        /// Tries to write a value to the <see cref="ManagedStream"/>. Returns FALSE if the value couldn't be written.
+        /// Tries to write a value to the <see cref="UnmanagedStream"/>. Returns FALSE if the value couldn't be written.
         /// </summary>
         public bool TryWrite<T>(T value) where T : unmanaged
         {
             int size = sizeof(T);
-            if (m_offset + size > Length)
+            if (m_offset + size > m_length)
             {
                 return false;
             }
@@ -558,12 +532,12 @@ namespace ByteStream.Mananged
         }
 
         /// <summary>
-        /// Tries to read a value from the <see cref="ManagedStream"/>. Returns FALSE if the value couldn't be read.
+        /// Tries to read a value from the <see cref="UnmanagedStream"/>. Returns FALSE if the value couldn't be read.
         /// </summary>
         public bool TryRead<T>(out T value) where T : unmanaged
         {
             int size = sizeof(T);
-            if (m_offset + size > Length)
+            if (m_offset + size > m_length)
             {
                 value = default;
                 return false;

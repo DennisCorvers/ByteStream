@@ -1,19 +1,17 @@
-﻿using ByteStream;
-using ByteStream.Mananged;
-using ByteStream.Unmanaged;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Text;
+using ByteStream.Mananged;
+using ByteStream;
+using System.Runtime.InteropServices;
+using ByteStream.Unmanaged;
 
 namespace ByteStreamTest.Unmanaged
 {
-    [TestFixture]
-    public class PtrReadWriteTest
+    public class ByteStreamTests
     {
-        //Do not change this value.
-        private const int BUFSIZE = 64;
+        private const int BUFSIZE = 32;
         private IntPtr m_buffer;
 
         [SetUp]
@@ -27,102 +25,96 @@ namespace ByteStreamTest.Unmanaged
             Marshal.FreeHGlobal(m_buffer);
         }
 
-        [TestCase(123, 1.2f, 1.3d)]
-        public void ValueTest(int iVal, float fVal, double dVal)
+        [Test]
+        public void ReadWriteTest()
         {
-            var pw = new PtrWriter(m_buffer, 64);
-            pw.Write(iVal); pw.Write(fVal); pw.Write(dVal);
+            UnmanagedStream bs = new UnmanagedStream();
 
-            var pr = new PtrReader(m_buffer, 64);
-            Assert.AreEqual(iVal, pr.Read<int>());
-            Assert.AreEqual(fVal, pr.Read<float>());
-            Assert.AreEqual(dVal, pr.Read<double>());
+            bs.ResetWrite(m_buffer, BUFSIZE);
 
-            Assert.AreEqual(16, pw.Offset);
-            Assert.AreEqual(pr.Offset, pw.Offset);
+            bs.Write(123);
+
+            bs.ResetRead();
+
+            int res = 0;
+            bs.Read(ref res);
+            Assert.AreEqual(123, res);
         }
 
         [Test]
-        public void TryWrite()
+        public void ResetReadFault()
         {
-            var bw = new PtrWriter(m_buffer, 64);
-            Assert.AreEqual(true, bw.TryWrite(123));
+            UnmanagedStream bs = new UnmanagedStream();
 
-            bw.SkipBytes(60);
-            Assert.AreEqual(false, bw.TryWrite(123));
+            Assert.Catch<InvalidOperationException>(() => { bs.ResetRead(); });
         }
 
         [Test]
-        public void TryRead()
+        public void InvalidateStreamer()
         {
-            var br = new PtrReader(m_buffer, 64);
-            Assert.AreEqual(true, br.TryRead(out int value));
+            UnmanagedStream bs = new UnmanagedStream();
+            bs.ResetWrite(m_buffer, 4);
 
-            br.SkipBytes(60);
-            Assert.AreEqual(false, br.TryRead(out int valu2));
+            bs.Write<int>(123);
+
+            Assert.Catch<InvalidOperationException>(() =>
+            {
+                bs.Write<int>(321);
+            });
         }
 
         [Test]
-        public void BytesTest()
+        public void InvalidateStream()
         {
-            byte[] val = new byte[4] { 1, 2, 3, 4 };
-            var pw = new PtrWriter(m_buffer, 64);
-            pw.WriteBytes(val);
+            UnmanagedStream bs = new UnmanagedStream();
+            bs.ResetWrite(m_buffer, 2);
 
-            var pr = new PtrReader(m_buffer, 64);
-            var returnVal = pr.ReadBytes(4);
+            Assert.Catch<InvalidOperationException>(() =>
+            {
+                bs.Write<int>(321);
+            });
 
-            Assert.AreEqual(val, returnVal);
-            Assert.AreEqual(4, pr.Offset);
-            Assert.AreEqual(pw.Offset, pr.Offset);
+            Assert.AreEqual(2, bs.Length);
         }
 
-        [TestCase("手機瀏覽")]
-        public void UTF16Test(string value)
+        [Test]
+        public void ResetStreamer()
         {
-            var pw = new PtrWriter(m_buffer, 64);
-            pw.WriteUTF16(value, true);
+            UnmanagedStream bs = new UnmanagedStream();
+            bs.ResetWrite(m_buffer, 8);
 
-            var pr = new PtrReader(m_buffer, 64);
-            Assert.AreEqual(value, pr.ReadUTF16());
-            Assert.AreEqual(pr.Offset, pw.Offset);
+            bs.Write<int>(333);
+
+            Assert.AreEqual(4, bs.Offset);
+            Assert.IsTrue(bs.IsWriting);
+
+            bs.ResetRead();
+
+            Assert.AreEqual(0, bs.Offset);
+            Assert.IsTrue(bs.IsReading);
         }
 
-        [TestCase("手機瀏覽")]
-        public void UTF16TestLen(string value)
+        [Test]
+        public void LargeStringWrite()
         {
-            var pw = new PtrWriter(m_buffer, 64);
-            pw.WriteUTF16(value);
+            UnmanagedStream ms = new UnmanagedStream();
+            ms.ResetWrite(Marshal.AllocHGlobal(128), 128);
 
-            var pr = new PtrReader(m_buffer, 64);
-            Assert.AreEqual(value, pr.ReadUTF16(value.Length));
-            Assert.AreEqual(pr.Offset, pw.Offset);
-            Assert.AreEqual(value.Length * sizeof(char), pw.Offset);
-        }
+            StringBuilder sb = new StringBuilder(50);
+            for (int i = 0; i < 50; i++)
+                sb.Append(i);
 
-        [TestCase("Test.")]
-        public void ANSITestLen(string value)
-        {
-            var pw = new PtrWriter(m_buffer, 64);
-            pw.WriteANSI(value);
+            var str = sb.ToString();
 
-            var pr = new PtrReader(m_buffer, 64);
-            Assert.AreEqual(value, pr.ReadANSI(value.Length));
-            Assert.AreEqual(pr.Offset, pw.Offset);
-            Assert.AreEqual(value.Length, pw.Offset);
-        }
+            ms.WriteString(str, Encoding.Default);
 
-        [TestCase("手機瀏覽")]
-        [TestCase("Test.")]
-        public void StringTest(string value)
-        {
-            var pw = new PtrWriter(m_buffer, 64);
-            pw.WriteString(value, Encoding.UTF32);
+            Assert.IsTrue(ms.Length >= 64);
 
-            var pr = new PtrReader(m_buffer, 64);
+            ms.ResetRead();
 
-            Assert.AreEqual(value, pr.ReadString(Encoding.UTF32));
-            Assert.AreEqual(pw.Offset, pr.Offset);
+            Assert.AreEqual(str, ms.ReadString(Encoding.Default));
+
+            Marshal.FreeHGlobal(ms.Buffer);
         }
     }
 }

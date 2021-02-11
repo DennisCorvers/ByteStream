@@ -16,6 +16,7 @@ namespace ByteStreamBenchmark.Comparison
         private readonly byte[] m_byteBuf;
         private readonly IntPtr m_ptrBuf;
         private readonly ManagedStream managedStream;
+        private readonly UnmanagedStream unmanagedStream;
 
         public WriteCompare()
         {
@@ -23,6 +24,7 @@ namespace ByteStreamBenchmark.Comparison
             m_byteBuf = new byte[size];
             m_ptrBuf = Marshal.AllocHGlobal(size);
             managedStream = new ManagedStream();
+            unmanagedStream = new UnmanagedStream();
         }
         ~WriteCompare()
         {
@@ -45,7 +47,25 @@ namespace ByteStreamBenchmark.Comparison
             { writer.Write(i); }
         }
 
-        //[Benchmark(Baseline = true)]
+        [Benchmark]
+        public void ManagedStream()
+        {
+            managedStream.ResetWrite(m_byteBuf);
+
+            for (int i = 0; i < AMOUNT; i++)
+                managedStream.Write(i);
+        }
+
+        [Benchmark]
+        public void UnmanagedStream()
+        {
+            unmanagedStream.ResetWrite(m_ptrBuf, AMOUNT * sizeof(int));
+
+            for (int i = 0; i < AMOUNT; i++)
+                unmanagedStream.Write(i);
+        }
+
+        [Benchmark(Baseline = true)]
         public void ArraySegment()
         {
             ArraySegment<byte> writer = new ArraySegment<byte>(m_byteBuf);
@@ -61,7 +81,7 @@ namespace ByteStreamBenchmark.Comparison
             }
         }
 
-        //[Benchmark]
+        [Benchmark]
         public void BitConvert()
         {
             int offset = 0;
@@ -73,7 +93,7 @@ namespace ByteStreamBenchmark.Comparison
             }
         }
 
-        //[Benchmark]
+        [Benchmark]
         public void Union()
         {
             int offset = 0;
@@ -87,15 +107,6 @@ namespace ByteStreamBenchmark.Comparison
                     offset++;
                 }
             }
-        }
-
-        [Benchmark]
-        public void ByteStream()
-        {
-            managedStream.ResetWrite(m_byteBuf);
-
-            for (int i = 0; i < AMOUNT; i++)
-                managedStream.Write(i);
         }
     }
 }

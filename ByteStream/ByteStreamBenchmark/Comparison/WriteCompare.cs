@@ -9,17 +9,20 @@ using System.Text;
 
 namespace ByteStreamBenchmark.Comparison
 {
+    [MemoryDiagnoser]
     public class WriteCompare
     {
         private const int AMOUNT = 1024;
         private readonly byte[] m_byteBuf;
         private readonly IntPtr m_ptrBuf;
+        private readonly ManagedStream managedStream;
 
         public WriteCompare()
         {
             int size = sizeof(int) * AMOUNT;
             m_byteBuf = new byte[size];
             m_ptrBuf = Marshal.AllocHGlobal(size);
+            managedStream = new ManagedStream();
         }
         ~WriteCompare()
         {
@@ -37,12 +40,12 @@ namespace ByteStreamBenchmark.Comparison
         [Benchmark]
         public void PtrWrite()
         {
-            PtrWriter writer = new PtrWriter(m_ptrBuf, AMOUNT*sizeof(int));
+            PtrWriter writer = new PtrWriter(m_ptrBuf, AMOUNT * sizeof(int));
             for (int i = 0; i < AMOUNT; i++)
             { writer.Write(i); }
         }
 
-        [Benchmark(Baseline = true)]
+        //[Benchmark(Baseline = true)]
         public void ArraySegment()
         {
             ArraySegment<byte> writer = new ArraySegment<byte>(m_byteBuf);
@@ -58,7 +61,7 @@ namespace ByteStreamBenchmark.Comparison
             }
         }
 
-        [Benchmark]
+        //[Benchmark]
         public void BitConvert()
         {
             int offset = 0;
@@ -70,7 +73,7 @@ namespace ByteStreamBenchmark.Comparison
             }
         }
 
-        [Benchmark]
+        //[Benchmark]
         public void Union()
         {
             int offset = 0;
@@ -84,6 +87,15 @@ namespace ByteStreamBenchmark.Comparison
                     offset++;
                 }
             }
+        }
+
+        [Benchmark]
+        public void ByteStream()
+        {
+            managedStream.ResetWrite(m_byteBuf);
+
+            for (int i = 0; i < AMOUNT; i++)
+                managedStream.Write(i);
         }
     }
 }

@@ -33,6 +33,7 @@ Bytestream offers 2 sets of serializers and deserializers, called writers and re
 - Byte arrays
 - ANSI strings (1-byte per character)
 - UTF16 strings (2-byte per character, default in C#)
+- Any string that's supported by .NET's Encoding class.
 
 *User-defined structs may change their layout when used on another system. Don't serialize user-defined structs unless you are absolutely certain the layout will be the same everywhere it is read back.*
 
@@ -140,4 +141,43 @@ writer.WritePoint(new Point(1, 2));
 
 ByteReader reader = new ByteReader(buffer);
 var point = reader.ReadPoint();
+```
+
+## Streaming classes
+
+The ManagedSteam and the UnmanagedStream make serialization of objects even easier. Below is an example of how to serialize a class using the IByteStream interface that comes with both of the aforementioned Streams.
+
+The Stream can simply be passed to the Serialize method. Depending if the Stream is in Write or Read mode, the object is serialized or deserialized automatically.
+
+```C#
+public class PlayerData
+{
+    public string Name;
+    public int Health;
+    public float Speed;
+    public PlayerInventory Inventory;
+
+    public void Serialize(IByteStream stream)
+    {
+        stream.SerializeString(ref Name, Encoding.ASCII);
+        stream.Serialize(ref Health);      
+        stream.Serialize(ref Speed);
+
+        Inventory.Serialize(stream);
+    }
+}
+```
+
+Extending either of the Stream classes (or the IByteStream Interface) is equally as easy as using them to serialize. Below is an example of a Serialize method for a Vector3 by extending IByteStream.
+
+```C#
+internal static class Extension
+{
+    public static void Serialize(this IByteStream stream, ref Vector3 vector)
+    {
+        stream.Serialize(ref vector.X);
+        stream.Serialize(ref vector.Y);
+        stream.Serialize(ref vector.Z);     
+    }
+}
 ```

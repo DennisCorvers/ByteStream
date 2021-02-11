@@ -3,12 +3,6 @@ A blazing fast byte (de)serializer for C#.
 
 Available on NuGet via ```Install-Package ByteStream```
 
-## Planned additions
-- Managed and unmanaged ByteStream class with Fluent API that incorporates a Reader and Writer in one.
-- Extended support for String operations.
-- Ability to pin the managed ByteStream for multiple write operations.
-- Field that indicates if the buffer operation exceeded its length rather than throwing an exception.
-
 ## What is ByteStream?
 Bytestream is a small library that enables blazing fast serialization of a collection of types to raw bytes. Either in the form of a byte array `byte[]` or unmanaged memory `IntPtr`.
 The library performs no memory allocation on its own, so you are free to use your own memory allocator!

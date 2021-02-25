@@ -38,7 +38,7 @@ namespace ByteStreamBenchmark.Comparison
         }
 
         [Benchmark]
-        public void ByteWrite()
+        public void ByteRead()
         {
             ByteReader reader = new ByteReader(m_byteBuf);
             for (int i = 0; i < AMOUNT; i++)
@@ -46,7 +46,7 @@ namespace ByteStreamBenchmark.Comparison
         }
 
         [Benchmark]
-        public void PtrWrite()
+        public void PtrRead()
         {
             PtrReader reader = new PtrReader(m_ptrBuf, AMOUNT * sizeof(int));
             for (int i = 0; i < AMOUNT; i++)

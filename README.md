@@ -40,15 +40,15 @@ Bytestream offers 2 sets of serializers and deserializers, called writers and re
 ## Comparison to other methods:
 Writing of 1024 integer (4-byte) values to a buffer.
 
-|          Method |      Mean |     Error |    StdDev | Ratio | RatioSD |  Gen 0 | Gen 1 | Gen 2 | Allocated |
-|---------------- |----------:|----------:|----------:|------:|--------:|-------:|------:|------:|----------:|
-|       ByteWrite |  2.202 us | 0.0035 us | 0.0033 us |  0.57 |    0.00 |      - |     - |     - |         - |
-|        PtrWrite |  1.774 us | 0.0130 us | 0.0122 us |  0.46 |    0.00 |      - |     - |     - |         - |
-|   ManagedStream |  2.134 us | 0.0022 us | 0.0020 us |  0.55 |    0.00 |      - |     - |     - |         - |
-| UnmanagedStream |  1.757 us | 0.0015 us | 0.0014 us |  0.45 |    0.00 |      - |     - |     - |         - |
-|    ArraySegment |  3.888 us | 0.0081 us | 0.0072 us |  1.00 |    0.00 |      - |     - |     - |         - |
-|      BitConvert | 10.996 us | 0.1466 us | 0.1371 us |  2.83 |    0.04 | 5.1880 |     - |     - |   32768 B |
-|           Union |  9.191 us | 0.0105 us | 0.0098 us |  2.36 |    0.00 |      - |     - |     - |         - |
+|          Method |      Mean |     Error |    StdDev | Ratio | RatioSD |  Gen 0 | Allocated |
+|---------------- |----------:|----------:|----------:|------:|--------:|-------:|----------:|
+|       ByteWrite |  2.202 us | 0.0035 us | 0.0033 us |  0.57 |    0.00 |      - |         - |
+|        PtrWrite |  1.774 us | 0.0130 us | 0.0122 us |  0.46 |    0.00 |      - |         - |
+|   ManagedStream |  2.134 us | 0.0022 us | 0.0020 us |  0.55 |    0.00 |      - |         - |
+| UnmanagedStream |  1.757 us | 0.0015 us | 0.0014 us |  0.45 |    0.00 |      - |         - |
+|    ArraySegment |  3.888 us | 0.0081 us | 0.0072 us |  1.00 |    0.00 |      - |         - |
+|      BitConvert | 10.996 us | 0.1466 us | 0.1371 us |  2.83 |    0.04 | 5.1880 |   32768 B |
+|           Union |  9.191 us | 0.0105 us | 0.0098 us |  2.36 |    0.00 |      - |         - |
 
 
 Reading of 1024 integer (4-byte) values from a buffer.

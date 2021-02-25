@@ -1,4 +1,5 @@
 ﻿using ByteStream.Interfaces;
+using ByteStream.Utils;
 using System;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -212,7 +213,7 @@ namespace ByteStream.Unmanaged
         private void EnsureCapacity(int bytesToRead)
         {
             if (bytesToRead + m_offset > m_length)
-                throw new InvalidOperationException("Read operation exceeds buffer size.");
+                ExceptionHelper.ThrowReadBufferExceeded();
         }
     }
 }

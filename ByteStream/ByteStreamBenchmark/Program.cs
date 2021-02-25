@@ -10,7 +10,7 @@ namespace ByteStreamBenchmark
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<ReadCompare>();
+            BenchmarkRunner.Run<WriteCompare>();
             Console.ReadLine();
         }
     }

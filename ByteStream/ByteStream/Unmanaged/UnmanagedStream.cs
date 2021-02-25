@@ -1,4 +1,5 @@
 ﻿using ByteStream.Interfaces;
+using ByteStream.Utils;
 using ByteStream.Utils.Unsafe;
 using System;
 using System.Collections.Generic;
@@ -9,8 +10,6 @@ namespace ByteStream.Unmanaged
 {
     public unsafe class UnmanagedStream : IWriter, IReader, IByteStream
     {
-        private const string BUFFER_OVERFLOW = "Buffer is set to a fixed size and cannot resize automatically.";
-
 #pragma warning disable IDE0032
         private IntPtr m_buffer;
         private int m_offset;
@@ -511,7 +510,7 @@ namespace ByteStream.Unmanaged
         private void EnsureCapacity(int size)
         {
             if (m_offset + size > m_length)
-                throw new InvalidOperationException(BUFFER_OVERFLOW);
+                ExceptionHelper.ThrowFixedBufferExceeded();
         }
 
         /// <summary>

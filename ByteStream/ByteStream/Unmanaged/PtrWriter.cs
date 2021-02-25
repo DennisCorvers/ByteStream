@@ -280,10 +280,11 @@ namespace ByteStream.Unmanaged
             Memory.CopyMemory((void*)m_buffer, (byte*)ptr + destinationIndex, length);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureCapacity(int bytesToAdd)
         {
             if (m_length < m_offset + (uint)bytesToAdd)
-                throw new InvalidOperationException("Unable to write more data.");
+                ExceptionHelper.ThrowWriteBufferExceeded();
         }
     }
 }

@@ -12,7 +12,6 @@ namespace ByteStream.Mananged
     public unsafe class ManagedStream : IWriter, IReader, IByteStream
     {
         public const int DefaultBufferSize = 1024;
-        private const string BUFFER_OVERFLOW = "Buffer is set to a fixed size and cannot resize automatically.";
 
 #pragma warning disable IDE0032
         private byte[] m_buffer;
@@ -526,7 +525,7 @@ namespace ByteStream.Mananged
             {
                 if (m_isFixedSize)
                 {
-                    throw new InvalidOperationException(BUFFER_OVERFLOW);
+                    ExceptionHelper.ThrowFixedBufferExceeded();
                 }
 
                 ArrayExtensions.ResizeUnsafe(ref m_buffer, MathUtils.NextPowerOfTwo(m_offset + size));
@@ -537,7 +536,7 @@ namespace ByteStream.Mananged
         private void EnsureReadCapacity(int size)
         {
             if (m_offset + size > m_buffer.Length)
-                throw new InvalidOperationException(BUFFER_OVERFLOW);
+                ExceptionHelper.ThrowFixedBufferExceeded();
         }
 
         /// <summary>

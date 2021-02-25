@@ -40,28 +40,28 @@ Bytestream offers 2 sets of serializers and deserializers, called writers and re
 ## Comparison to other methods:
 Writing of 1024 integer (4-byte) values to a buffer.
 
-|          Method |      Mean |     Error |    StdDev | Ratio | RatioSD |  Gen 0 | Allocated |
-|---------------- |----------:|----------:|----------:|------:|--------:|-------:|----------:|
-|       ByteWrite |  2.202 us | 0.0035 us | 0.0033 us |  0.57 |    0.00 |      - |         - |
-|        PtrWrite |  1.774 us | 0.0130 us | 0.0122 us |  0.46 |    0.00 |      - |         - |
-|   ManagedStream |  2.134 us | 0.0022 us | 0.0020 us |  0.55 |    0.00 |      - |         - |
-| UnmanagedStream |  1.757 us | 0.0015 us | 0.0014 us |  0.45 |    0.00 |      - |         - |
-|    ArraySegment |  3.888 us | 0.0081 us | 0.0072 us |  1.00 |    0.00 |      - |         - |
-|      BitConvert | 10.996 us | 0.1466 us | 0.1371 us |  2.83 |    0.04 | 5.1880 |   32768 B |
-|           Union |  9.191 us | 0.0105 us | 0.0098 us |  2.36 |    0.00 |      - |         - |
+|          Method |      Mean |     Error |    StdDev | Ratio |  Gen 0 | Allocated |
+|---------------- |----------:|----------:|----------:|------:|-------:|----------:|
+|       ByteWrite |  2.199 us | 0.0048 us | 0.0043 us |  0.57 |      - |         - |
+|        PtrWrite |  1.651 us | 0.0074 us | 0.0069 us |  0.43 |      - |         - |
+|   ManagedStream |  1.705 us | 0.0012 us | 0.0010 us |  0.44 |      - |         - |
+| UnmanagedStream |  1.351 us | 0.0058 us | 0.0055 us |  0.35 |      - |         - |
+|    ArraySegment |  3.875 us | 0.0050 us | 0.0042 us |  1.00 |      - |         - |
+|      BitConvert | 10.762 us | 0.0227 us | 0.0201 us |  2.78 | 5.1880 |   32768 B |
+|           Union |  9.001 us | 0.0438 us | 0.0410 us |  2.32 |      - |         - |
 
 
 Reading of 1024 integer (4-byte) values from a buffer.
 
-|          Method |     Mean |     Error |    StdDev | Ratio | Gen 0 | Gen 1 | Gen 2 | Allocated |
-|---------------- |---------:|----------:|----------:|------:|------:|------:|------:|----------:|
-|       ByteWrite | 1.834 us | 0.0014 us | 0.0013 us |  0.49 |     - |     - |     - |         - |
-|        PtrWrite | 1.764 us | 0.0065 us | 0.0060 us |  0.47 |     - |     - |     - |         - |
-|   ManagedStream | 2.028 us | 0.0017 us | 0.0015 us |  0.54 |     - |     - |     - |         - |
-| UnmanagedStream | 1.694 us | 0.0081 us | 0.0076 us |  0.46 |     - |     - |     - |         - |
-|    ArraySegment | 3.721 us | 0.0053 us | 0.0044 us |  1.00 |     - |     - |     - |         - |
-|      BitConvert | 1.556 us | 0.0112 us | 0.0105 us |  0.42 |     - |     - |     - |         - |
-|           Union | 9.025 us | 0.0466 us | 0.0389 us |  2.43 |     - |     - |     - |         - |
+|          Method |     Mean |     Error |    StdDev | Ratio | Gen 0 | Allocated |
+|---------------- |---------:|----------:|----------:|------:|------:|----------:|
+|        ByteRead | 1.311 us | 0.0045 us | 0.0042 us |  0.35 |     - |         - |
+|         PtrRead | 1.239 us | 0.0055 us | 0.0052 us |  0.33 |     - |         - |
+|   ManagedStream | 1.172 us | 0.0012 us | 0.0012 us |  0.32 |     - |         - |
+| UnmanagedStream | 1.192 us | 0.0048 us | 0.0045 us |  0.32 |     - |         - |
+|    ArraySegment | 3.712 us | 0.0085 us | 0.0080 us |  1.00 |     - |         - |
+|      BitConvert | 1.542 us | 0.0046 us | 0.0043 us |  0.42 |     - |         - |
+|           Union | 9.421 us | 0.0336 us | 0.0314 us |  2.54 |     - |         - |
 
 When using ArraySegment, BitConverter and Unioning structs the user needs to keep track of the offsets themselves. Manual bitshifting may also be required to read and write values.
 
